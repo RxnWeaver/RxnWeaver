@@ -25,7 +25,7 @@ assign_priorities_2(molecule) {
     .foreach((a) => {
         a.set_priority(
             a.neighbours()
-            .map((nbr) => nbr.atomic_number)
+            .map((nbr) => nbr.atomic_number())
             .sum()
             + a.atomic_number()
         );
