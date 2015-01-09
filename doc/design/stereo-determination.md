@@ -24,7 +24,7 @@ fn assign_priorities(mol: &mut Molecule) {
         a.set_priority(
             a.neighbours()
             .fold(a.atomic_number(),
-                  |acc, nbr| { acc + nbr.atomic_number() })
+                  |acc, &nbr| { acc + nbr.atomic_number() })
         );
     }
 }
