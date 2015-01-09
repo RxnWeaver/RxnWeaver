@@ -20,7 +20,7 @@ First, we determine the base priorities of all atoms.  A indicative function to 
 
 ```rust
 fn assign_priorities(mol: &mut Molecule) {
-    for a in mol.atoms() {
+    for &a in mol.atoms() {
         a.set_priority(
             a.neighbours()
             .fold(a.atomic_number(),
