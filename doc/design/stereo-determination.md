@@ -16,19 +16,17 @@ Here is an outline of how we determine tetrahedral chirality.
 
 ### Priority Determination
 
-First, we determine the base priorities of all atoms.
+First, we determine the base priorities of all atoms.  A indicative function to perform the same could look as follows, in Rust.
 
-```
-assign_priorities(molecule) {
-    molecule
-    .atoms()
-    .foreach((a) => {
+```rust
+fn assign_priorities(mol: &mut Molecule) {
+    for a in mol.atoms() {
         a.set_priority(
             a.neighbours()
             .fold(a.atomic_number(),
-                  (acc, nbr) => acc + nbr.atomic_number())
+                  |acc, nbr| { acc + nbr.atomic_number() })
         );
-    });
+    }
 }
 ```
 
