@@ -32,7 +32,7 @@ fn assign_priorities(mol: &mut Molecule) {
 
 ### Adding Z-coordinates
 
-Next, we look at each tetrahedral chiral centre.  For illustration, let us consider one such, which we refer to as **X**.  We designate its neighbours **A**, **B**, **C** and **D**, *in **descending** order of priority*.  For each of its bonds, the input is expected to specify whether it is *on the plane*, *out of the plane* or *into the plane*.  The pointy end of the bond is always directed towards **X**.
+Next, we look at each tetrahedral chiral centre.  For illustration, let us consider one such, which we refer to as **X**.  We designate its neighbours **A**, **B**, **C** and **D**, in **_descending_** order of priority.  For each of its bonds, the input is expected to specify whether it is *on the plane*, *out of the plane* or *into the plane*.  The pointy end of the bond is always directed towards **X**.
 
 Let **O** be the origin of the coordinate system.  We assume the input to specify the 3-D coordinates of each atom, where the Z-coordinate is `0.0`.
 
