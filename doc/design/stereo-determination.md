@@ -19,15 +19,14 @@ Here is an outline of how we determine tetrahedral chirality.
 First, we determine the base priorities of all atoms.
 
 ```
-assign_priorities_2(molecule) {
+assign_priorities(molecule) {
     molecule
     .atoms()
     .foreach((a) => {
         a.set_priority(
             a.neighbours()
-            .map((nbr) => nbr.atomic_number())
-            .sum()
-            + a.atomic_number()
+            .fold(a.atomic_number(),
+                  (acc, nbr) => acc + nbr.atomic_number())
         );
     });
 }
@@ -39,7 +38,7 @@ Next, we look at each tetrahedral chiral centre.  For illustration, let us consi
 
 Let **O** be the origin of the coordinate system.  We assume the input to specify the 3-D coordinates of each atom, where the Z-coordinate is `0.0`.
 
-Now, we walk through the bonds that are either out of the plane or into the plane.  The end-point neighbour of such a bond is adjusted to have its Z-coordinate either incremented by or decremented by 0.5, respectively.
+Now, we walk through the bonds that are either out of the plane or into the plane.  The end-point neighbour of such a bond is adjusted to have its Z-coordinate either incremented by or decremented by `0.5`, respectively.
 
 ### Bond Vector Construction
 
