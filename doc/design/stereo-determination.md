@@ -3,7 +3,7 @@
 The major types of stereo configurations have to be determined when
 analysing the structure of a molecule.
 
-- Tetrahedral chirality
+- Tetrahedral stereo parity
 - Double bond stereo parity
 - Cumulene/allene stereo parity
 
@@ -18,9 +18,9 @@ reason is: in a general case, it is not possible to determine stereo
 configuration unambiguously purely based on topology and 2-D
 coordinates.
 
-## Tetrahedral Chirality
+## Tetrahedral Stereo Parity
 
-Here is an outline of how we determine tetrahedral chirality.
+Here is an outline of how we determine tetrahedral stereo parity.
 
 ### Priority Determination
 
