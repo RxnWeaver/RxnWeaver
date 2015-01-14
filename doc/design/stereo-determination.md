@@ -4,8 +4,10 @@ The major types of stereo configurations have to be determined when
 analysing the structure of a molecule.
 
 - Tetrahedral stereo parity
-- Double bond stereo parity
-- Cumulene/allene stereo parity
+- Stereogenic single or double bond stereo parity
+- Cumulene stereo parity
+- Allene stereo parity
+- Alternating stereo bonds in rings
 
 Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
