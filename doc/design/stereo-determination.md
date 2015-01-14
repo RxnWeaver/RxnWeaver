@@ -3,9 +3,11 @@
 The major types of stereo configurations have to be determined when
 analysing the structure of a molecule.
 
-- Tetrahedral chirality
-- Double bond stereo parity
-- Cumulene/allene stereo parity
+- Tetrahedral stereo parity
+- Stereogenic single or double bond stereo parity
+- Cumulene stereo parity
+- Allene stereo parity
+- Alternating stereo bonds in rings
 
 Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
@@ -18,9 +20,9 @@ reason is: in a general case, it is not possible to determine stereo
 configuration unambiguously purely based on topology and 2-D
 coordinates.
 
-## Tetrahedral Chirality
+## Tetrahedral Stereo Parity
 
-Here is an outline of how we determine tetrahedral chirality.
+Here is an outline of how we determine tetrahedral stereo parity.
 
 ### Priority Determination
 
