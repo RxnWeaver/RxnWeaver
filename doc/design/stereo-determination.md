@@ -106,3 +106,23 @@ anti-clockwise.
 As per convention, clockwise rotation parity is named `R` (for Latin
 *rectus* meaning right) and anti-clockwise rotation parity is named
 `S` (for Latin *sinister* meaning left).
+
+### Simplified Computation
+
+Computationally, the above can be reduced to the determinant of the
+following 3x3 matrix (or its row-major equivalent).
+
+```
+| XA_x  XB_x  XD_x |
+|                  |
+| XA_y  XB_y  XD_y |
+|                  |
+| XA_z  XB_z  XD_z |
+```
+
+The equivalence of the two methods of calculations follows directly
+from the expansion of the vector computations, and mapping of the
+terms to those in the calculation of determinants using Sarrus' rule.
+
+Should the value of this determinant be positive, the parity is `R`;
+else it is `S`.
