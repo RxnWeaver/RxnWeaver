@@ -32,15 +32,10 @@ coordinates.
 
 Let **O** be the origin of the coordinate system.  The 3-D coordinates
 `(x, y, z)` of an atom **P** represent a 3-D vector **_OP_**.  For
-illustration, suppose that the current atoms of interest are
-represented by the vectors **_OX_**, **_OA_**, **_OB_**, **_OC_** and
-**_OD_**.  The vectors representing the bonds can then be constructed
-as follows.
+illustration, suppose that a bond exists between atoms **A** and
+**B**.  We can construct the bond vector between them **_AB_** as
 
-- **_XA_** = **_OA_** **-** **_OX_**
-- **_XB_** = **_OB_** **-** **_OX_**
-- **_XC_** = **_OC_** **-** **_OX_**
-- **_XD_** = **_OD_** **-** **_OX_**
+- **_AB_** = **_OB_** **-** **_OA_**.
 
 ## Stereogenic Bond Parity
 
