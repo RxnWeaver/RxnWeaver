@@ -3,9 +3,9 @@
 The major types of stereo configurations have to be determined when
 analysing the structure of a molecule.
 
-- Tetrahedral stereo parity
-- Stereogenic single or double bond stereo parity
+- Stereogenic bond parity
 - Cumulene stereo parity
+- Tetrahedral stereo parity
 - Allene stereo parity
 - Alternating stereo bonds in rings
 
@@ -13,12 +13,58 @@ Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
 
-**N.B.** Should the input molecule have *no* recorded stereo
-information at all (*i.e.* up/down bond information and identification
+Notably, we differ in parity naming convention.  InChI maps all
+determinable configurations into two parities: **even** and **odd**.
+This is not very intuitive, and often requires looking up the meaning
+of a parity in the context of a particular stereo configuration.  We
+have observed that most scientists re-map the InChI parity value to
+_old school_ `R`, `S`, `E`, `Z`, _etc_.  Accordingly, we directly use
+the old school symbols themselves.
+
+**_N.B._** Should the input molecule have *no* recorded stereo
+information at all (_i.e._ up/down bond information and identification
 of all chiral centres), we treat the molecule as non-chiral!  The
 reason is: in a general case, it is not possible to determine stereo
 configuration unambiguously purely based on topology and 2-D
 coordinates.
+
+## Bond Vector Construction
+
+Let **O** be the origin of the coordinate system.  The 3-D coordinates
+`(x, y, z)` of an atom **P** represent a 3-D vector **_OP_**.  For
+illustration, suppose that a bond exists between atoms **A** and
+**B**.  We can construct the bond vector between them **_AB_** as
+
+- **_AB_** = **_OB_** **-** **_OA_**.
+
+## Stereogenic Bond Parity
+
+Let atoms **A** and **B** be singly or doubly bonded.  Suppose that
+atom **X** is singly bonded to **A**, and that atom **Y** is singly
+bonded to **B**.  Further suppose that all the bonds lie in the same
+plane.  There are two possible configurations, as shown here.
+
+```
+    X                      X      Y
+     \                      \    /
+      A==B                   A==B    (or)    A==B
+          \                                 /    \
+           Y                               X      Y
+```
+
+We compute the vector dot product of **_AX_** and **_BY_**.
+
+- **dprod** = **_AX_** **.** **_BY_**
+
+Should **dprod** be negative, we have the former case with those two
+vectors pointing in opposite directions, falling on opposite sides of
+the stereogenic bond between **A** and **B**.  Such a configuration is
+named `E` parity (for German *entgegen*, meaning opposite).
+
+Should **dprod** be positive, we have the one of the latter cases with
+those two vectors falling on the same side of the stereogenic bond
+between **A** and **B**.  Such a configuration is named `Z` parity
+(for German *zusammen*, meaning same).
 
 ## Tetrahedral Stereo Parity
 
@@ -28,7 +74,7 @@ Here is an outline of how we determine tetrahedral stereo parity.
 
 First, we determine the base priorities of all atoms.  The priority of
 an atom is the sum of its atomic number and those of all of its
-neighbours.  For a double bond, the neighbour is counted twice, *etc*.
+neighbours.  For a double bond, the neighbour is counted twice, _etc_.
 
 An indicative function to perform the same could look as follows, in
 Rust (here we assume that this method is in `Molecule`).
@@ -60,26 +106,13 @@ order of priority.  For each of its bonds, the input is expected to
 specify whether it is *on the plane*, *out of the plane* or *into the
 plane*.  The pointy end of the bond is always directed towards **X**.
 
-Let **O** be the origin of the coordinate system.  We assume the input
-to specify the 3-D coordinates of each atom, where the Z-coordinate is
-`0.0`.
+We assume the input to specify the 3-D coordinates of each atom, where
+the Z-coordinate is `0.0`.
 
 Now, we walk through the bonds that are either out of the plane or
 into the plane.  The end-point neighbour of such a bond is adjusted to
 have its Z-coordinate either incremented by or decremented by `0.5`,
 respectively.
-
-### Bond Vector Construction
-
-The 3-D coordinates `(x, y, z)` of an atom **P** represent a 3-D
-vector **_OP_**.  Thus, the current atoms of interest are represented
-by the vectors **_OX_**, **_OA_**, **_OB_**, **_OC_** and **_OD_**.
-The vectors representing the bonds can then be constructed as follows.
-
-- **_XA_** = **_OA_** **-** **_OX_**
-- **_XB_** = **_OB_** **-** **_OX_**
-- **_XC_** = **_OC_** **-** **_OX_**
-- **_XD_** = **_OD_** **-** **_OX_**
 
 ### Stereo Parity Determination
 
@@ -104,8 +137,8 @@ clockwise rotation of priority from **A** to **B**.  Else, it was
 anti-clockwise.
 
 As per convention, clockwise rotation parity is named `R` (for Latin
-*rectus* meaning right) and anti-clockwise rotation parity is named
-`S` (for Latin *sinister* meaning left).
+*rectus*, meaning right) and anti-clockwise rotation parity is named
+`S` (for Latin *sinister*, meaning left).
 
 ### Simplified Computation
 
