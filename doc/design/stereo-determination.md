@@ -13,6 +13,14 @@ Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
 
+Notably, we differ in parity naming convention.  InChI maps all
+determinable configurations into two parities: **even** and **odd**.
+This is not very intuitive, and often requires looking up the meaning
+of a parity in the context of a particular stereo configuration.  We
+have observed that most scientists re-map the InChI parity value to
+_old school_ `R`, `S`, `E`, `Z`, _etc_.  Accordingly, we directly use
+the _old school_ symbols themselves.
+
 **N.B.** Should the input molecule have *no* recorded stereo
 information at all (*i.e.* up/down bond information and identification
 of all chiral centres), we treat the molecule as non-chiral!  The
