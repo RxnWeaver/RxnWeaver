@@ -5,9 +5,9 @@ analysing the structure of a molecule.
 
 - Stereogenic bond parity
 - Cumulene stereo parity
+- Stereo bonds in rings
 - Tetrahedral stereo parity
 - Allene stereo parity
-- Alternating stereo bonds in rings
 
 Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
@@ -83,6 +83,31 @@ are as follows:
 
 where, `...` represents one or more atoms all of which are doubly
 bonded to form a chain.
+
+## Stereo Bonds in Rings
+
+As per InChI rules, in rings whose size >= 8, all double bonds are
+treated as stereogenic.
+
+Similarly, in rings whose size >= 8, all alternating single/double
+bonds are treated as stereogenic.  That helps in unambiguously
+distinguishing between the following two ring configurations.
+
+```
+                 D--E
+                //   \\
+             B--C      F--G                 B--C      F--G
+           //              \\             //   \\   //    \\
+          A                  H           A      D--E        H
+           \               /              \               /
+            N==M       J==I                N==M       J==I
+                \     /                        \     /
+                  L==K                           L==K
+
+```
+
+For each stereogenic bond, the determination of stereo parity shall be
+according to the same rule given above for simple stereogenic bonds.
 
 ## Tetrahedral Stereo Parity
 
