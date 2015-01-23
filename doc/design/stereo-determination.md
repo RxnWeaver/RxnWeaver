@@ -119,23 +119,6 @@ First, we determine the base priorities of all atoms.  The priority of
 an atom is the sum of its atomic number and those of all of its
 neighbours.  For a double bond, the neighbour is counted twice, _etc_.
 
-An indicative function to perform the same could look as follows, in
-Rust (here we assume that this method is in `Molecule`).
-
-```{rust}
-fn assign_priorities(&mut self: Self) {
-    for &a in self.atoms() {
-        a.set_priority(
-            a.bonds()
-            .fold(a.atomic_number(),
-                  |acc, &bnd| { acc +
-                                bnd.order() *
-                                bnd.other_atom(a).atomic_number() })
-        );
-    }
-}
-```
-
 *Should a chiral centre have two neighbours that are both tetrahedral
 chiral centres themselves, the one with `R` parity is given priority
 over that with `S`.*
