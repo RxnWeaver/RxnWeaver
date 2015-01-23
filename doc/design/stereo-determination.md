@@ -86,12 +86,13 @@ bonded to form a chain.
 
 ## Stereo Bonds in Rings
 
-As per InChI rules, in rings whose size >= 8, all double bonds are
-treated as stereogenic.
+As per InChI rules, in all-carbon rings whose size >= 8, all double
+bonds are treated as stereogenic.
 
-Similarly, in rings whose size >= 8, all alternating single/double
-bonds are treated as stereogenic.  That helps in unambiguously
-distinguishing between the following two ring configurations.
+Similarly, in all-carbon rings whose size >= 8, all alternating
+single/double bonds are treated as stereogenic.  That helps in
+unambiguously distinguishing between the following two ring
+configurations.
 
 ```
                  D--E
