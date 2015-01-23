@@ -185,3 +185,35 @@ terms to those in the calculation of determinants using Sarrus' rule.
 
 Should the value of this determinant be positive, the parity is `R`;
 else it is `S`.
+
+### Tetrahedral Atom With 3 Neighbours
+
+In the case of a central tetrahedral atom with either one double bond
+or an implicit hydrogen, the following rule shall apply.
+
+Suppose that atoms **A**, **B** and **C** are the neighbours of the
+central atom **X**, in **_descending_** order of priority.
+
+Now, **A**, **B** and **C** lie in a plane, with **X** falling to one
+side of that plane.  The following calculations assume that **X** is
+*behind* the said plane.
+
+We compute the vector cross-product of **_XA_** and **_XB_**.
+
+- **_XA_x_XB_** = **_XA_** **x** **_XB_**
+
+Depending on the angle `theta` between them (as measured from
+**_XA_**), the resulting vector **_XA_x_XB_** points towards either
+that side of the plane with **X** in it, or the opposite side.
+
+The case is decided by doing a dot product of this result vector with
+**_XC_**.
+
+- **dprod** = **_XA_x_XB_** **.** **_XC_**
+
+Should **dprod** be negative, then **_XA_x_XB_** was a result of a
+clockwise rotation of priority from **A** to **B**.  Else, it was
+anti-clockwise.
+
+As per convention, clockwise rotation parity is named `R` and
+anti-clockwise rotation parity is named `S`.
