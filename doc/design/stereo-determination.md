@@ -25,7 +25,7 @@ the old school symbols themselves.
 information at all (_i.e._ up/down bond information and identification
 of all chiral centres), we treat the molecule as non-chiral!  The
 reason is: in a general case, it is not possible to determine stereo
-configuration unambiguously purely based on topology and 2-D
+configuration unambiguously based only on topology and 2-D
 coordinates.
 
 ## Bond Vector Construction
@@ -65,6 +65,24 @@ Should **dprod** be positive, we have the one of the latter cases with
 those two vectors falling on the same side of the stereogenic bond
 between **A** and **B**.  Such a configuration is named `Z` parity
 (for German *zusammen*, meaning same).
+
+## Cumulene Stereo Parity
+
+The treatment of cumulenes follows that of stereogenic bonds described
+above.  In the case of cumulenes, atoms **A** and **B** are connected
+by a chain of double bonds.  The two possible stereo configurations
+are as follows:
+
+```
+    X                           X           Y
+     \                           \         /
+      A==...==B                   A==...==B    (or)    A==...==B
+               \                                      /         \
+                Y                                    X           Y
+```
+
+where, `...` represents one or more atoms all of which are doubly
+bonded to form a chain.
 
 ## Tetrahedral Stereo Parity
 
