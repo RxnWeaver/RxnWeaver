@@ -81,7 +81,7 @@ are as follows:
                 Y                                    X           Y
 ```
 
-where, `...` represents one or more atoms all of which are doubly
+where, `...` represents two or more atoms all of which are doubly
 bonded to form a chain.
 
 ## Stereo Bonds in Rings
