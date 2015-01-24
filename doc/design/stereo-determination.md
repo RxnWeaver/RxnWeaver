@@ -218,3 +218,61 @@ anti-clockwise.
 
 As per convention, clockwise rotation parity is named `R` and
 anti-clockwise rotation parity is named `S`.
+
+## Allene Stereo Parity
+
+The case of allene stereo configurations is similar to that of
+cumulene ones.  The key difference is that in the case of cumulene,
+there is no atom identified as a chiral centre.  The cumulene chain
+represents the stereogenic bond.  On the other hand, in the case of
+allene, the central `C` is marked as a chiral centre.
+
+```
+            X         Y
+             \       /
+              A==C==B
+```
+
+Here, **A** should have a higher priority than **B**.
+
+Given the above arrangement, there are two possible stereo
+configurations.  They are both determined based on how **X** and **Y**
+are oriented relative to each the other, when observed from **A**,
+with the line containing **A**, **C** and **B** collapsed.
+
+```
+                     Y                      Y
+                     |                      |
+                  X--A                      A--X
+```
+
+Looking at this in another way, given that the atom `C` is a chiral
+centre, we can test if (**A**, **B**, **Y**) represents a clockwise
+rotation or an anti-clockwise, when seen from **X** along **A**.  In
+that case, the above two configurations translate to the following
+two, respectively.
+
+```
+               Y                            Y
+               |                            |
+               B==C==A                A==C==B
+```
+
+In the first of the above cases, the parity is `EVEN`; it is `ODD` in
+the latter case.
+
+### Parity Computation
+
+Given the above configurations, and assuming **A** to have higher
+priority than **B**, the following matrix determinant should be
+calculated.
+
+```
+          | 1.0  X_x  X_y  X_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  Y_x  Y_y  Y_z |
+```
+
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
