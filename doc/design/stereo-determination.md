@@ -24,15 +24,6 @@ all chiral centres is not there), we treat the molecule as having
 it is not possible to determine stereo configuration unambiguously
 based only on topology and 2-D coordinates.
 
-## Bond Vector Construction
-
-Let **O** be the origin of the coordinate system.  The 3-D coordinates
-`(x, y, z)` of an atom **P** represent a 3-D vector **_OP_**.  For
-illustration, suppose that a bond exists between atoms **A** and
-**B**.  We can construct the bond vector between them **_AB_** as
-
-- **_AB_** = **_OB_** **-** **_OA_**.
-
 ## Stereogenic Bond Parity
 
 Let atoms **A** and **B** be singly or doubly bonded.  Suppose that
