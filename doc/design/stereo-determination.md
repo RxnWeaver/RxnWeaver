@@ -160,6 +160,10 @@ or an implicit hydrogen, we construct the matrix with the central atom
 as that with the highest priority, followed by the three neighbours in
 decreasing order of priority.
 
+Given **X** as the central atom, and **A**, **B** and **C** as its
+three neighbours listed in descending order of priority, we compute
+the following matrix determinant.
+
 ```
           | 1.0  X_x  X_y  X_z |
           | 1.0  A_x  A_y  A_z |
