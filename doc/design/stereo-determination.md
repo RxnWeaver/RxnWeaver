@@ -22,10 +22,11 @@ _old school_ `R`, `S`, `E`, `Z`, _etc_.  Accordingly, we directly use
 the old school symbols themselves.
 
 **_N.B._** Should the input molecule have *no* recorded stereo
-information at all (_i.e._ up/down bond information and identification
-of all chiral centres), we treat the molecule as non-chiral!  The
-reason is: in a general case, it is not possible to determine stereo
-configuration unambiguously based only on topology and 2-D
+information at all (_i.e._ all relevant Z-coordinates happen to be the
+same, up/down bond information is not present, and identification of
+all chiral centres is not there), we treat the molecule as non-chiral!
+The reason is: in a general case, it is not possible to determine
+stereo configuration unambiguously based only on topology and 2-D
 coordinates.
 
 ## Bond Vector Construction
