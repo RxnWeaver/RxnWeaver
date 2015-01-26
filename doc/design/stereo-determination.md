@@ -13,14 +13,6 @@ Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
 
-Notably, we differ in parity naming convention.  InChI maps all
-determinable configurations into two parities: **even** and **odd**.
-This is not very intuitive, and often requires looking up the meaning
-of a parity in the context of a particular stereo configuration.  We
-have observed that most scientists re-map the InChI parity value to
-_old school_ `R`, `S`, `E`, `Z`, _etc_.  Accordingly, we directly use
-the old school symbols themselves.
-
 **_N.B._** Should the input molecule have *no* recorded stereo
 information at all (_i.e._ all relevant Z-coordinates happen to be the
 same, up/down bond information is not present, and identification of
@@ -60,12 +52,11 @@ We compute the vector dot product of **_AX_** and **_BY_**.
 Should **dprod** be negative, we have the former case with those two
 vectors pointing in opposite directions, falling on opposite sides of
 the stereogenic bond between **A** and **B**.  Such a configuration is
-named `E` parity (for German *entgegen*, meaning opposite).
+named `EVEN` parity.
 
 Should **dprod** be positive, we have the one of the latter cases with
 those two vectors falling on the same side of the stereogenic bond
-between **A** and **B**.  Such a configuration is named `Z` parity
-(for German *zusammen*, meaning same).
+between **A** and **B**.  Such a configuration is named `ODD` parity.
 
 ## Cumulene Stereo Parity
 
@@ -121,9 +112,9 @@ First, we determine the base priorities of all atoms.  The priority of
 an atom is the sum of its atomic number and those of all of its
 neighbours.  For a double bond, the neighbour is counted twice, _etc_.
 
-*Should a chiral centre have two neighbours that are both tetrahedral
-chiral centres themselves, the one with `R` parity is given priority
-over that with `S`.*
+**_N.B._** *Should a chiral centre have two neighbours that are both
+tetrahedral chiral centres themselves, the one with `EVEN` parity is
+given priority over that with `ODD`.*
 
 ### Adding Z-coordinates
 
@@ -164,9 +155,8 @@ Should **dprod** be positive, then **_XA_x_XB_** was a result of a
 clockwise rotation of priority from **A** to **B**.  Else, it was
 anti-clockwise.
 
-As per convention, clockwise rotation parity is named `R` (for Latin
-*rectus*, meaning right) and anti-clockwise rotation parity is named
-`S` (for Latin *sinister*, meaning left).
+As per convention, clockwise rotation parity is named `EVEN` and
+anti-clockwise rotation parity is named `ODD`.
 
 ### Simplified Computation
 
@@ -217,8 +207,8 @@ Should **dprod** be negative, then **_XA_x_XB_** was a result of a
 clockwise rotation of priority from **A** to **B**.  Else, it was
 anti-clockwise.
 
-As per convention, clockwise rotation parity is named `R` and
-anti-clockwise rotation parity is named `S`.
+As per convention, clockwise rotation parity is named `EVEN` and
+anti-clockwise rotation parity is named `ODD`.
 
 ## Allene Stereo Parity
 
