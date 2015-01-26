@@ -133,17 +133,18 @@ given priority over that with `ODD`.*
 Next, we look at each tetrahedral chiral centre.  For illustration,
 let us consider one such, which we refer to as **X**.  We designate
 its neighbours **A**, **B**, **C** and **D**, in **_descending_**
-order of priority.  For each of its bonds, the input is expected to
-specify whether it is *on the plane*, *out of the plane* or *into the
-plane*.  The pointy end of the bond is always directed towards **X**.
+order of priority.
 
-We assume the input to specify the 3-D coordinates of each atom, where
-the Z-coordinate is `0.0`.
+Where 3-D coordinates are not available, we assume the input to
+specify 2-D coordinates of each atom, with the Z-coordinate being
+`0.0`.  For each of its bonds, the input is expected to specify
+whether it is *on the plane*, *out of the plane* or *into the plane*.
+The pointy end of the bond is always directed towards **X**.
 
 Now, we walk through the bonds that are either out of the plane or
 into the plane.  The end-point neighbour of such a bond is adjusted to
-have its Z-coordinate either incremented by or decremented by `0.5`,
-respectively.
+have its Z-coordinate either incremented by or decremented by a
+pre-computed amount, respectively.
 
 ### Parity Computation
 
