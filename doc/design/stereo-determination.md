@@ -55,6 +55,10 @@ plane.  There are two possible configurations, as shown here.
            Y                               X      Y
 ```
 
+In this configuration, there is no specific atom acting as a stereo
+centre.  Rather, the bond between **A** and **B** is assigned the
+determined stereo parity.
+
 ### Parity Computation
 
 Given the above configurations, and assuming **A** to have higher
@@ -87,6 +91,10 @@ are as follows:
 
 where, `...` represents two or more atoms all of which are doubly
 bonded to form a chain.
+
+Again, in this configuration, there is no specific atom acting as a
+stereo centre.  Rather, the bond between **A** and **B** is assigned
+the determined stereo parity.
 
 ## Stereo Bonds in Rings
 
