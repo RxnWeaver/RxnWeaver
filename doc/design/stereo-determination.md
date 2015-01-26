@@ -1,5 +1,29 @@
+# General
+
 **_N.B._ In what follows, we always assume a right-handed cartesian
   coordinate system.**
+
+The following order of precedence is used in utilising the available
+information in the input molecule, while determining stereo parities.
+
+1. If 3-D coordinates are available for all molecules, or for all
+   molecules except one, we use them for all calculations.
+1. If 2-D coordinates are available for all molecules, and 2-D bond
+   stereo information is available, we adjust Z-coordinates of the
+   involved atoms appropriately.  Then, we employ the same
+   calculations as above.
+1. Should the stereo configuration involve only planar elements
+   (stereogenic bond case), we utilise the 2-D coordinates of the
+   atoms if available.
+
+**_N.B._** Should the input molecule have *no* recorded stereo
+information at all (_i.e._ all coordinates are zeroes or all relevant
+Z-coordinates happen to be the same, up/down bond information is not
+present, and identification of all chiral centres is not there), we
+treat the molecule as having **no** stereo configuration at all!  The
+reason is: in a general case, it is not possible to determine stereo
+configuration unambiguously based only on topology and either 0-D or
+2-D coordinates.
 
 # Stereo Configuration Determination
 
@@ -15,14 +39,6 @@ analysing the structure of a molecule.
 Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
-
-**_N.B._** Should the input molecule have *no* recorded stereo
-information at all (_i.e._ all relevant Z-coordinates happen to be the
-same, up/down bond information is not present, and identification of
-all chiral centres is not there), we treat the molecule as having
-**no** stereo configuration at all!  The reason is: in a general case,
-it is not possible to determine stereo configuration unambiguously
-based only on topology and 2-D coordinates.
 
 ## Stereogenic Bond Parity
 
