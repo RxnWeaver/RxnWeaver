@@ -1,3 +1,6 @@
+**_N.B._ In what follows, we always assume a right-handed cartesian
+  coordinate system.**
+
 # Stereo Configuration Determination
 
 The major types of stereo configurations have to be determined when
@@ -13,20 +16,13 @@ Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
 
-Notably, we differ in parity naming convention.  InChI maps all
-determinable configurations into two parities: **even** and **odd**.
-This is not very intuitive, and often requires looking up the meaning
-of a parity in the context of a particular stereo configuration.  We
-have observed that most scientists re-map the InChI parity value to
-_old school_ `R`, `S`, `E`, `Z`, _etc_.  Accordingly, we directly use
-the old school symbols themselves.
-
 **_N.B._** Should the input molecule have *no* recorded stereo
-information at all (_i.e._ up/down bond information and identification
-of all chiral centres), we treat the molecule as non-chiral!  The
-reason is: in a general case, it is not possible to determine stereo
-configuration unambiguously based only on topology and 2-D
-coordinates.
+information at all (_i.e._ all relevant Z-coordinates happen to be the
+same, up/down bond information is not present, and identification of
+all chiral centres is not there), we treat the molecule as having
+**no** stereo configuration at all!  The reason is: in a general case,
+it is not possible to determine stereo configuration unambiguously
+based only on topology and 2-D coordinates.
 
 ## Bond Vector Construction
 
@@ -52,19 +48,20 @@ plane.  There are two possible configurations, as shown here.
            Y                               X      Y
 ```
 
-We compute the vector dot product of **_AX_** and **_BY_**.
+### Parity Computation
 
-- **dprod** = **_AX_** **.** **_BY_**
+Given the above configurations, and assuming **A** to have higher
+priority than **B**, the following matrix determinant is calculated.
 
-Should **dprod** be negative, we have the former case with those two
-vectors pointing in opposite directions, falling on opposite sides of
-the stereogenic bond between **A** and **B**.  Such a configuration is
-named `E` parity (for German *entgegen*, meaning opposite).
+```
+          | 1.0  X_x  X_y  X_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  Y_x  Y_y  Y_z |
+```
 
-Should **dprod** be positive, we have the one of the latter cases with
-those two vectors falling on the same side of the stereogenic bond
-between **A** and **B**.  Such a configuration is named `Z` parity
-(for German *zusammen*, meaning same).
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ## Cumulene Stereo Parity
 
@@ -120,9 +117,9 @@ First, we determine the base priorities of all atoms.  The priority of
 an atom is the sum of its atomic number and those of all of its
 neighbours.  For a double bond, the neighbour is counted twice, _etc_.
 
-*Should a chiral centre have two neighbours that are both tetrahedral
-chiral centres themselves, the one with `R` parity is given priority
-over that with `S`.*
+**_N.B._** *Should a chiral centre have two neighbours that are both
+tetrahedral chiral centres themselves, the one with `EVEN` parity is
+given priority over that with `ODD`.*
 
 ### Adding Z-coordinates
 
@@ -141,83 +138,41 @@ into the plane.  The end-point neighbour of such a bond is adjusted to
 have its Z-coordinate either incremented by or decremented by `0.5`,
 respectively.
 
-### Stereo Parity Determination
+### Parity Computation
 
-An important matter to realise (and visualise) is that since **A**,
-**B** and **C** lie in a plane, **D** falls to one side of that plane.
-
-We compute the vector cross-product of **_XA_** and **_XB_**.
-
-- **_XA_x_XB_** = **_XA_** **x** **_XB_**
-
-Depending on the angle `theta` between them (as measured from
-**_XA_**), the resulting vector **_XA_x_XB_** points towards either
-that side of the plane with **D** in it, or the opposite side.
-
-The case is decided by doing a dot product of this result vector with
-**_XD_**.
-
-- **dprod** = **_XA_x_XB_** **.** **_XD_**
-
-Should **dprod** be positive, then **_XA_x_XB_** was a result of a
-clockwise rotation of priority from **A** to **B**.  Else, it was
-anti-clockwise.
-
-As per convention, clockwise rotation parity is named `R` (for Latin
-*rectus*, meaning right) and anti-clockwise rotation parity is named
-`S` (for Latin *sinister*, meaning left).
-
-### Simplified Computation
-
-Computationally, the above can be reduced to the determinant of the
-following 3x3 matrix (or its row-major equivalent).
+Given the above orders of priority of the neighbours **A**, **B**,
+**C** and **D**, we calculate the following matrix determinant.
 
 ```
-| XA_x  XB_x  XD_x |
-|                  |
-| XA_y  XB_y  XD_y |
-|                  |
-| XA_z  XB_z  XD_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  C_x  C_y  C_z |
+          | 1.0  D_x  D_y  D_z |
 ```
 
-The equivalence of the two methods of calculations follows directly
-from the expansion of the vector computations, and mapping of the
-terms to those in the calculation of determinants using Sarrus' rule.
-
-Should the value of this determinant be positive, the parity is `R`;
-else it is `S`.
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ### Tetrahedral Atom With 3 Neighbours
 
 In the case of a central tetrahedral atom with either one double bond
-or an implicit hydrogen, the following rule shall apply.
+or an implicit hydrogen, we construct the matrix with the central atom
+as that with the highest priority, followed by the three neighbours in
+decreasing order of priority.
 
-Suppose that atoms **A**, **B** and **C** are the neighbours of the
-central atom **X**, in **_descending_** order of priority.
+Given **X** as the central atom, and **A**, **B** and **C** as its
+three neighbours listed in descending order of priority, we compute
+the following matrix determinant.
 
-Now, **A**, **B** and **C** lie in a plane, with **X** falling to one
-side of that plane.  The following calculations assume that **X** is
-*behind* the said plane.
+```
+          | 1.0  X_x  X_y  X_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  C_x  C_y  C_z |
+```
 
-We compute the vector cross-product of **_XA_** and **_XB_**.
-
-- **_XA_x_XB_** = **_XA_** **x** **_XB_**
-
-Depending on the angle `theta` between them (as measured from
-**_XA_**), the resulting vector **_XA_x_XB_** points towards either
-that side of the plane with **X** in it, or the opposite side.
-
-The case is decided by doing a dot product of this result vector with
-**_XC_**.
-
-- **dprod** = **_XA_x_XB_** **.** **_XC_**
-
-Should **dprod** be negative, then **_XA_x_XB_** was a result of a
-clockwise rotation of priority from **A** to **B**.  Else, it was
-anti-clockwise.
-
-As per convention, clockwise rotation parity is named `R` and
-anti-clockwise rotation parity is named `S`.
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ## Allene Stereo Parity
 
@@ -264,8 +219,7 @@ the latter case.
 ### Parity Computation
 
 Given the above configurations, and assuming **A** to have higher
-priority than **B**, the following matrix determinant should be
-calculated.
+priority than **B**, the following matrix determinant is calculated.
 
 ```
           | 1.0  X_x  X_y  X_z |
