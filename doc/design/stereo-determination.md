@@ -45,18 +45,20 @@ plane.  There are two possible configurations, as shown here.
            Y                               X      Y
 ```
 
-We compute the vector dot product of **_AX_** and **_BY_**.
+### Parity Computation
 
-- **dprod** = **_AX_** **.** **_BY_**
+Given the above configurations, and assuming **A** to have higher
+priority than **B**, the following matrix determinant is calculated.
 
-Should **dprod** be negative, we have the former case with those two
-vectors pointing in opposite directions, falling on opposite sides of
-the stereogenic bond between **A** and **B**.  Such a configuration is
-named `EVEN` parity.
+```
+          | 1.0  X_x  X_y  X_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  Y_x  Y_y  Y_z |
+```
 
-Should **dprod** be positive, we have the one of the latter cases with
-those two vectors falling on the same side of the stereogenic bond
-between **A** and **B**.  Such a configuration is named `ODD` parity.
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ## Cumulene Stereo Parity
 
@@ -133,82 +135,37 @@ into the plane.  The end-point neighbour of such a bond is adjusted to
 have its Z-coordinate either incremented by or decremented by `0.5`,
 respectively.
 
-### Stereo Parity Determination
+### Parity Computation
 
-An important matter to realise (and visualise) is that since **A**,
-**B** and **C** lie in a plane, **D** falls to one side of that plane.
-
-We compute the vector cross-product of **_XA_** and **_XB_**.
-
-- **_XA_x_XB_** = **_XA_** **x** **_XB_**
-
-Depending on the angle `theta` between them (as measured from
-**_XA_**), the resulting vector **_XA_x_XB_** points towards either
-that side of the plane with **D** in it, or the opposite side.
-
-The case is decided by doing a dot product of this result vector with
-**_XD_**.
-
-- **dprod** = **_XA_x_XB_** **.** **_XD_**
-
-Should **dprod** be positive, then **_XA_x_XB_** was a result of a
-clockwise rotation of priority from **A** to **B**.  Else, it was
-anti-clockwise.
-
-As per convention, clockwise rotation parity is named `EVEN` and
-anti-clockwise rotation parity is named `ODD`.
-
-### Simplified Computation
-
-Computationally, the above can be reduced to the determinant of the
-following 3x3 matrix (or its row-major equivalent).
+Given the above orders of priority of the neighbours **A**, **B**,
+**C** and **D**, we calculate the following matrix determinant.
 
 ```
-| XA_x  XB_x  XD_x |
-|                  |
-| XA_y  XB_y  XD_y |
-|                  |
-| XA_z  XB_z  XD_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  C_x  C_y  C_z |
+          | 1.0  D_x  D_y  D_z |
 ```
 
-The equivalence of the two methods of calculations follows directly
-from the expansion of the vector computations, and mapping of the
-terms to those in the calculation of determinants using Sarrus' rule.
-
-Should the value of this determinant be positive, the parity is `R`;
-else it is `S`.
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ### Tetrahedral Atom With 3 Neighbours
 
 In the case of a central tetrahedral atom with either one double bond
-or an implicit hydrogen, the following rule shall apply.
+or an implicit hydrogen, we construct the matrix with the central atom
+as that with the highest priority, followed by the three neighbours in
+decreasing order of priority.
 
-Suppose that atoms **A**, **B** and **C** are the neighbours of the
-central atom **X**, in **_descending_** order of priority.
+```
+          | 1.0  X_x  X_y  X_z |
+          | 1.0  A_x  A_y  A_z |
+          | 1.0  B_x  B_y  B_z |
+          | 1.0  C_x  C_y  C_z |
+```
 
-Now, **A**, **B** and **C** lie in a plane, with **X** falling to one
-side of that plane.  The following calculations assume that **X** is
-*behind* the said plane.
-
-We compute the vector cross-product of **_XA_** and **_XB_**.
-
-- **_XA_x_XB_** = **_XA_** **x** **_XB_**
-
-Depending on the angle `theta` between them (as measured from
-**_XA_**), the resulting vector **_XA_x_XB_** points towards either
-that side of the plane with **X** in it, or the opposite side.
-
-The case is decided by doing a dot product of this result vector with
-**_XC_**.
-
-- **dprod** = **_XA_x_XB_** **.** **_XC_**
-
-Should **dprod** be negative, then **_XA_x_XB_** was a result of a
-clockwise rotation of priority from **A** to **B**.  Else, it was
-anti-clockwise.
-
-As per convention, clockwise rotation parity is named `EVEN` and
-anti-clockwise rotation parity is named `ODD`.
+Should the determinant be positive, the parity is `EVEN`; should it be
+negative, it is `ODD`.
 
 ## Allene Stereo Parity
 
@@ -255,8 +212,7 @@ the latter case.
 ### Parity Computation
 
 Given the above configurations, and assuming **A** to have higher
-priority than **B**, the following matrix determinant should be
-calculated.
+priority than **B**, the following matrix determinant is calculated.
 
 ```
           | 1.0  X_x  X_y  X_z |
