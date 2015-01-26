@@ -1,3 +1,6 @@
+**_N.B._ In what follows, we always assume a right-handed cartesian
+  coordinate system.**
+
 # Stereo Configuration Determination
 
 The major types of stereo configurations have to be determined when
