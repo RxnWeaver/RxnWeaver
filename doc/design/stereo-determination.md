@@ -1,5 +1,29 @@
+# General
+
 **_N.B._ In what follows, we always assume a right-handed cartesian
   coordinate system.**
+
+The following order of precedence is used in utilising the available
+information in the input molecule, while determining stereo parities.
+
+1. If 3-D coordinates are available for all molecules, or for all
+   molecules except one, we use them for all calculations.
+1. If 2-D coordinates are available for all molecules, and 2-D bond
+   stereo information is available, we adjust Z-coordinates of the
+   involved atoms appropriately.  Then, we employ the same
+   calculations as above.
+1. Should the stereo configuration involve only planar elements
+   (stereogenic bond case), we utilise the 2-D coordinates of the
+   atoms if available.
+
+**_N.B._** Should the input molecule have *no* recorded stereo
+information at all (_i.e._ all coordinates are zeroes or all relevant
+Z-coordinates happen to be the same, up/down bond information is not
+present, and identification of all chiral centres is not there), we
+treat the molecule as having **no** stereo configuration at all!  The
+reason is: in a general case, it is not possible to determine stereo
+configuration unambiguously based only on topology and either 0-D or
+2-D coordinates.
 
 # Stereo Configuration Determination
 
@@ -15,14 +39,6 @@ analysing the structure of a molecule.
 Our treatment of the same shall follow the approach described in the
 InChI API documentation v1.04.  Specific algorithms may coincide or
 differ, based on computational considerations.
-
-**_N.B._** Should the input molecule have *no* recorded stereo
-information at all (_i.e._ all relevant Z-coordinates happen to be the
-same, up/down bond information is not present, and identification of
-all chiral centres is not there), we treat the molecule as having
-**no** stereo configuration at all!  The reason is: in a general case,
-it is not possible to determine stereo configuration unambiguously
-based only on topology and 2-D coordinates.
 
 ## Stereogenic Bond Parity
 
@@ -117,17 +133,18 @@ given priority over that with `ODD`.*
 Next, we look at each tetrahedral chiral centre.  For illustration,
 let us consider one such, which we refer to as **X**.  We designate
 its neighbours **A**, **B**, **C** and **D**, in **_descending_**
-order of priority.  For each of its bonds, the input is expected to
-specify whether it is *on the plane*, *out of the plane* or *into the
-plane*.  The pointy end of the bond is always directed towards **X**.
+order of priority.
 
-We assume the input to specify the 3-D coordinates of each atom, where
-the Z-coordinate is `0.0`.
+Where 3-D coordinates are not available, we assume the input to
+specify 2-D coordinates of each atom, with the Z-coordinate being
+`0.0`.  For each of its bonds, the input is expected to specify
+whether it is *on the plane*, *out of the plane* or *into the plane*.
+The pointy end of the bond is always directed towards **X**.
 
 Now, we walk through the bonds that are either out of the plane or
 into the plane.  The end-point neighbour of such a bond is adjusted to
-have its Z-coordinate either incremented by or decremented by `0.5`,
-respectively.
+have its Z-coordinate either incremented by or decremented by a
+pre-computed amount, respectively.
 
 ### Parity Computation
 
