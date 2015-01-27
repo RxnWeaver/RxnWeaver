@@ -55,6 +55,10 @@ plane.  There are two possible configurations, as shown here.
            Y                               X      Y
 ```
 
+In this configuration, there is no specific atom acting as a stereo
+centre.  Rather, the bond between **A** and **B** is assigned the
+determined stereo parity.
+
 ### Parity Computation
 
 Given the above configurations, and assuming **A** to have higher
@@ -87,6 +91,10 @@ are as follows:
 
 where, `...` represents two or more atoms all of which are doubly
 bonded to form a chain.
+
+Again, in this configuration, there is no specific atom acting as a
+stereo centre.  Rather, the bond between **A** and **B** is assigned
+the determined stereo parity.
 
 ## Stereo Bonds in Rings
 
@@ -181,6 +189,13 @@ the following matrix determinant.
 
 Should the determinant be positive, the parity is `EVEN`; should it be
 negative, it is `ODD`.
+
+### Unknown Parity
+
+When one of the bonds of a central atom has stereo configuration of
+`EITHER`, the atom is marked as having the parity `UNKNOWN`.  The
+wedge end of the bond must point to the said central atom for this
+rule to apply.
 
 ## Allene Stereo Parity
 
