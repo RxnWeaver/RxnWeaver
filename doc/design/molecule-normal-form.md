@@ -5,8 +5,8 @@ information from both the input MDL `.MOL` V2000 format data, and the
 additional information that **RxnWeaver** needs and updates throughout
 the retrosynthesis process.
 
-**_N.B._** *We do **not** provide compatibility with MDL's V3000
-  format (`.MOL` or any other) files.*
+**_N.B._** _We do **not** provide compatibility with MDL's V3000
+  format (`.MOL` or any other) files._
 
 ## Atom
 
