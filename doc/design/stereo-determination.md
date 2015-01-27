@@ -190,6 +190,13 @@ the following matrix determinant.
 Should the determinant be positive, the parity is `EVEN`; should it be
 negative, it is `ODD`.
 
+### Unknown Parity
+
+When one of the bonds of a central atom has stereo configuration of
+`EITHER`, the atom is marked as having the parity `UNKNOWN`.  The
+wedge end of the bond must point to the said central atom for this
+rule to apply.
+
 ## Allene Stereo Parity
 
 The case of allene stereo configurations is similar to that of
