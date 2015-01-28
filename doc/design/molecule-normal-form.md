@@ -8,7 +8,7 @@ the retrosynthesis process.
 **_N.B._** _We do **not** provide compatibility with MDL's V3000
   format (`.MOL` or any other) files._
 
-## Atom
+## Atoms
 
 Each atom knows its element, current valence configuration, if it is
 an isotope of its element, any residual charge on it, the number of
@@ -37,3 +37,16 @@ _vice versa_.  However, due to the CIP priorities mentioned, their
 respective indices may be different.  This repetition does waste some
 space, but is very convenient when accessing and traversing
 neighbours.
+
+## Bonds
+
+Each bond represents the chemical bond between exactly one pair of
+atoms.  It records the bond order, as well as stereo information
+should it be applicable.
+
+In a given molecule, we should never have more than one bond
+connecting the same pair of atoms.
+
+*N.B. We do not use InChI's provision to store stereo information
+ relative to the second atom.  We always store stereo information of a
+ bond relative to the first atom.*
