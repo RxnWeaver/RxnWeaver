@@ -128,9 +128,8 @@ Here is an outline of how we determine tetrahedral stereo parity.
 
 ### Priority Determination
 
-First, we determine the base priorities of all atoms.  The priority of
-an atom is the sum of its atomic number and those of all of its
-neighbours.  For a double bond, the neighbour is counted twice, _etc_.
+First, we determine the base priorities of all atoms.  See
+[normal form description](molecule-normal-form.md) for details.
 
 **_N.B._** *Should a chiral centre have two neighbours that are both
 tetrahedral chiral centres themselves, the one with `EVEN` parity is
