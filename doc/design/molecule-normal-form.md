@@ -50,3 +50,8 @@ connecting the same pair of atoms.
 *N.B. We do not use InChI's provision to store stereo information
  relative to the second atom.  We always store stereo information of a
  bond relative to the first atom.*
+
+In addition, each bond tracks if it is aromatic, if it participates in
+any rings, which rings it participates in if so, if it is in a chain
+linking two separate ring systems (that belong to the same connected
+component), _etc_.
