@@ -35,9 +35,10 @@ in a stereo configuration or not.  This priority is computed based on
 a compound value including the atom's own atomic number and those of
 its neighbours listed in descending order of atomic numbers.
 
-Information about neighbours is stored as an adjacency list.  The
-neighbours in the list are sorted in descending order of their
-respective CIP priorities.
+Information about neighbours is stored as an adjacency list.  Double
+and triple bonds are taken into account by repeating the neighbour as
+many times.  The neighbours in the list are sorted in descending order
+of their respective CIP priorities.
 
 For ease of look up, adjacency lists are full: if atom **A** is a
 neighbour of atom **B**, the adjacency list of **B** lists **A**, and
