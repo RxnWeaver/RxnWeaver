@@ -11,8 +11,8 @@ the retrosynthesis process.
 ## Atom
 
 Each atom knows its element, current valence configuration, if it is
-an isotope of its element, any residual charge on itself, the number
-of (explicit and implicit) hydrogen atoms attached to it, its spatial
+an isotope of its element, any residual charge on it, the number of
+(explicit and implicit) hydrogen atoms attached to it, its spatial
 coordinates, its neighbours, the specific bonds with them, _etc_.
 
 Atoms have a normalised form to which they are converted after the
@@ -21,7 +21,7 @@ involves multiple steps, the most important of which are described
 hereunder.
 
 Each atom is assigned a priority as per the standard
-Cahn-Ingold-Prelog (CIP) rules, authoritatively described in
+**Cahn-Ingold-Prelog (CIP)** rules, authoritatively described in
 *R.S. Cahn, C.K. Ingold and V. Prelog, Angew. Chem. 78, 413-447
 (1966), Angew. Chem. Internat. Ed. Eng. 5, 385-415, 511 (1966); and
 V. Prelog and G. Helmchen, Angew. Chem. 94, 614-631 (1982),
@@ -30,3 +30,10 @@ Angew. Chem. Internat. Ed. Eng. 21, 567-583 (1982)*.
 Information about neighbours is stored as an adjacency list.  The
 neighbours in the list are sorted in **descending** order of their
 respective CIP priorities.
+
+For ease of look up, adjacency lists are full: if atom **A** is a
+neighbour of atom **B**, the adjacency list of **B** lists **A**, and
+_vice versa_.  However, due to the CIP priorities mentioned, their
+respective indices may be different.  This repetition does waste some
+space, but is very convenient when accessing and traversing
+neighbours.
