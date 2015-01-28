@@ -20,7 +20,7 @@ entire molecule is read and validated.  The process of normalisation
 involves multiple steps, the most important of which are described
 hereunder.
 
-Each atom is assigned a priority as per the standard
+Each atom is assigned a priority building on the standard
 **Cahn-Ingold-Prelog (CIP)** rules, authoritatively described in
 *R.S. Cahn, C.K. Ingold and V. Prelog, Angew. Chem. 78, 413-447
 (1966), Angew. Chem. Internat. Ed. Eng. 5, 385-415, 511 (1966); and
@@ -35,10 +35,36 @@ in a stereo configuration or not.  This priority is computed based on
 a compound value including the atom's own atomic number and those of
 its neighbours listed in descending order of atomic numbers.
 
+### Calculation of Normal IDs
+
+A simple way to determine the normalised IDs of atoms is described
+here.
+
+1. For each atom, construct a `struct` with the input ID of the atom,
+   and a tuple of a fixed length of 21 (1 for the current atom + 20
+   for the maximum number of expanded neighbours to take into account,
+   as per InChI's treatment).
+1. Initially, fill the tuple with zeroes.
+1. Put the current atom's atomic number in the first position of the
+   tuple.
+1. Put the atomic numbers of the neighbours in the following
+   positions, in descending order of their atomic numbers.  When
+   multiple neighbours with the same atomic number exist, their order
+   does not matter.
+1. Repeat the neighbour twice for a double bond, and thrice for a
+   triple bond.
+1. Once such `struct`s are constructed for all atoms, sort those
+   `struct`s on the tuple in each of them.  Two tuples are compared
+   element by element, in order, from left to right.
+1. The new order of the `struct`s gives the normalised IDs of atoms,
+   counting from `1` rather than `0`.
+
+### Adjacency Lists
+
 Information about neighbours is stored as an adjacency list.  Double
 and triple bonds are taken into account by repeating the neighbour as
-many times.  The neighbours in the list are sorted in descending order
-of their respective CIP priorities.
+many times.  The neighbours in the list are sorted in ascending order
+of their normalised IDs.
 
 For ease of look up, adjacency lists are full: if atom **A** is a
 neighbour of atom **B**, the adjacency list of **B** lists **A**, and
