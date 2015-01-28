@@ -27,9 +27,18 @@ Each atom is assigned a priority as per the standard
 V. Prelog and G. Helmchen, Angew. Chem. 94, 614-631 (1982),
 Angew. Chem. Internat. Ed. Eng. 21, 567-583 (1982)*.
 
-Information about neighbours is stored as an adjacency list.  The
-neighbours in the list are sorted in **descending** order of their
-respective CIP priorities.
+Since CIP rules are specifically for determining stereo
+configurations, they are usually applied in stereo sites (chiral
+atoms, stereogenic bonds, _etc_.).  In our case, priority is assigned
+to each atom of the molecule, irrespective of whether it is involved
+in a stereo configuration or not.  This priority is computed based on
+a compound value including the atom's own atomic number and those of
+its neighbours listed in descending order of atomic numbers.
+
+Information about neighbours is stored as an adjacency list.  Double
+and triple bonds are taken into account by repeating the neighbour as
+many times.  The neighbours in the list are sorted in descending order
+of their respective CIP priorities.
 
 For ease of look up, adjacency lists are full: if atom **A** is a
 neighbour of atom **B**, the adjacency list of **B** lists **A**, and
@@ -50,3 +59,8 @@ connecting the same pair of atoms.
 *N.B. We do not use InChI's provision to store stereo information
  relative to the second atom.  We always store stereo information of a
  bond relative to the first atom.*
+
+In addition, each bond tracks if it is aromatic, if it participates in
+any rings, which rings it participates in if so, if it is in a chain
+linking two separate ring systems (that belong to the same connected
+component), _etc_.
