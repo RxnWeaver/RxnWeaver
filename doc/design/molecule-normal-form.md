@@ -106,3 +106,14 @@ In its normal form, a ring stores the normalised IDs of its atoms
 starting with that having lowest normalised ID (or, equivalently, the
 the highest priority).  The other atoms are, of course, in the order
 in which they form the ring.
+
+## Ring Systems
+
+A ring system represents a set of physically fused rings.  The fusion
+can have exactly one atom as the common atom of the involved rings
+(spiro), one bond in common between any given pair of rings (normal),
+or more than one bond in common between at least two rings (involves
+bridges).
+
+Unlike a ring, a ring system is not frozen, and can change during the
+course of the life of a molecule.
