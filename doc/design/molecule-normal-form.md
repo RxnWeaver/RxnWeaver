@@ -90,3 +90,19 @@ In addition, each bond tracks if it is aromatic, if it participates in
 any rings, which rings it participates in if so, if it is in a chain
 linking two separate ring systems (that belong to the same connected
 component), _etc_.
+
+## Rings
+
+Each ring maintains a list of the atoms comprising it, the bonds
+comprising it, other rings that neighbour it (_i.e.,_ they share at
+least one atom or bond with the current ring), if it is aromatic,
+_etc_.
+
+Once a ring is constructed, it is effectively frozen.  Altering it in
+any way results in its destruction.  The only way to alter a ring into
+a different ring, is to create a new desired ring.
+
+In its normal form, a ring stores the normalised IDs of its atoms
+starting with that having lowest normalised ID (or, equivalently, the
+the highest priority).  The other atoms are, of course, in the order
+in which they form the ring.
