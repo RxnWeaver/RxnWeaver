@@ -79,6 +79,11 @@ Each bond represents the chemical bond between exactly one pair of
 atoms.  It records the bond order, as well as stereo information
 should it be applicable.
 
+*N.B. In case we do not store references to atoms in the bond, we have
+ to store both the input IDs and the normalised IDs of the two atoms.
+ The reason is that at the time of construction of the bond from
+ input, only input IDs of the atoms are known.*
+
 In a given molecule, we should never have more than one bond
 connecting the same pair of atoms.
 
