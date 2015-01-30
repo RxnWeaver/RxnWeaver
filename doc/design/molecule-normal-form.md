@@ -122,3 +122,8 @@ bridges).
 
 Unlike a ring, a ring system is not frozen, and can change during the
 course of the life of a molecule.
+
+## Inter-atomic Distances and Paths
+
+We use the famous Floyd-Warshall algorithm to compute the shortest
+pair-wise distances and paths between all atoms in a given molecule.
