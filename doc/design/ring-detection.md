@@ -48,3 +48,34 @@ non-junction atom.
    the current path.
 1. Add the new candidate path to the list of candidate paths.
 
+### Ring Validation
+
+If the candidate ring has only three members, it is always a valid
+ring (there is exactly one way of forming such a ring).
+
+Otherwise, we employ the following procedure.
+
+1. For each atom in the candidate ring, count the number of its
+   neighbours that are present in this candidate ring.
+1. If that number is exactly two, this ring is genuine.
+1. If it is greater than two, _i.e.,_ at least one atom has more than
+   two neighbours in this ring, then we have a spurious outer shell
+   ring, not a genuine ring.
+
+We evaluate all candidate rings, resulting in the set of genuine rings
+in the molecule.
+
+### Ring System Detection
+
+We then detect ring systems formed by the rings.
+
+- If a ring and another share a bond, they are fused.  Create a ring
+  system of them.
+- Each other ring sharing a bond or an atom with this ring system
+  joins it.
+- Disjoint rings start independent ring systems.
+- Ring systems that share a ring are fused into a single ring system.
+- Loop through the rings, until all of them fall into their respective
+  ring systems.
+
+Note that it is possible for a ring system to be monocyclic.
