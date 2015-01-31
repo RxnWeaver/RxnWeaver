@@ -36,3 +36,15 @@ non-junction atom.
 
 ### Path Evaluation
 
+1. For each neighbour of the most recent atom visited, the following
+   is followed.
+1. If the next atom is the same as the beginning of the path, then we
+   have a candidate ring.  We validate it, and - if successful - add
+   it as a ring to the molecule.  We proceed to the next neighbour.
+1. If the next atom is one of the atoms visited already, then we have
+   a candidate ring.  We validate it, and - if successful - add it as
+   a ring to the molecule.  We proceed to the next neighbour.
+1. Else, construct a new candidate path by appending the next atom to
+   the current path.
+1. Add the new candidate path to the list of candidate paths.
+
