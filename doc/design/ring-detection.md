@@ -65,7 +65,7 @@ Otherwise, we employ the following procedure.
 We evaluate all candidate rings, resulting in the set of genuine rings
 in the molecule.
 
-### Ring System Detection
+## Ring System Detection
 
 We then detect ring systems formed by the rings.
 
@@ -79,3 +79,20 @@ We then detect ring systems formed by the rings.
   ring systems.
 
 Note that it is possible for a ring system to be monocyclic.
+
+### Basis Set of Rings
+
+For each ring system, we sort its rings in ascending order of size.
+We determine the smallest set of smallest rings that covers the ring
+system.  This set is the smallest basis set of rings for that ring
+system.
+
+### Pruning Spurious Rings
+
+Rings not in the basis set are each evaluated to see if they should be
+retained or pruned.
+
+A broad rule that is applied is: a ring that **cannot** be expressed
+as a union of exactly two of the basis rings is a spurious ring.  It
+is pruned.  On the other hand, a genuine ring is added to the basis
+set.
