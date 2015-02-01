@@ -1,5 +1,9 @@
 package common
 
+import (
+	"fmt"
+)
+
 // Element holds the essential chemical information of a given natural
 // element.
 type Element struct {
