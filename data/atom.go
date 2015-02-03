@@ -1,13 +1,13 @@
 package data
 
 import (
-	"github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
 const (
 	MaxBonds    = 20
-	MaxRings    = common.ListSizeSmall
-	MaxFeatures = common.ListSizeSmall
+	MaxRings    = cmn.ListSizeSmall
+	MaxFeatures = cmn.ListSizeSmall
 )
 
 // Atom represents a chemical atom.
@@ -16,10 +16,11 @@ const (
 // transient information attached to it during its participation in
 // reactions.
 type Atom struct {
-	mol   *Molecule // Containing molecule of this atom.
-	atNum uint8     // Atomic number of this atom's element.
-	iId   uint16    // Serial input ID of this atom.
-	nId   uint16    // Normalised ID of this atom.
+	mol    *Molecule // Containing molecule of this atom.
+	atNum  uint8     // Atomic number of this atom's element.
+	symbol string    // Symbol, in case of a different isotope.
+	iId    uint16    // Serial input ID of this atom.
+	nId    uint16    // Normalised ID of this atom.
 
 	X float32 // X-coordinate of this atom.
 	Y float32 // Y-coordinate of this atom.
@@ -46,4 +47,25 @@ type Atom struct {
 	// The functional groups substituted on this atom.  They are listed in
 	// descending order of importance.  The first is the primary feature.
 	features [MaxFeatures]uint8
+}
+
+// newAtom constructs and initialises a new atom of the given element
+// type, and belonging to the given molecule.
+func newAtom(mol *Molecule, atNum uint8) *Atom {
+	atom := new(Atom)
+	atom.mol = mol
+	atom.atNum = atNum
+	atom.valence = cmn.PeriodicTable[cmn.ElemSyms[atNum]].Valence
+
+	return atom
+}
+
+// AtomicNumber answers the atomic number of this atom.
+func (a *Atom) AtomicNumber() uint8 {
+	return a.atNum
+}
+
+// Parent answers the parent molecule of this atom.
+func (a *Atom) Parent() *Molecule {
+	return a.mol
 }
