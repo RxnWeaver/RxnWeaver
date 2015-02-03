@@ -71,7 +71,8 @@ func (a *Atom) Parent() *Molecule {
 // contributed by this atom.  This number is important for calculating
 // the aromaticity of the rings this atom participates in.
 func (a *Atom) numPiElectrons() int {
-	wtSum := 100*int8(a.numDoubleBonds) + 10*int8(a.numSingleBonds) + a.charge
+	mol := a.mol
+	wtSum := 100*int16(a.numDoubleBonds) + 10*int16(a.numSingleBonds) + int16(a.charge)
 
 	switch a.atNum {
 	case 6:
@@ -82,17 +83,78 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, idx := range a.bonds {
-				b = a.mol.bonds[idx-1]
+			for _, bid := range a.bonds {
+				b = mol.bonds[bid-1]
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
 			}
 			if len(b.rings) > 0 {
 				return 1
-			} else {
-				return 0
 			}
+			return 0
+		default:
+			return 0
+		}
+
+	case 7:
+		switch wtSum {
+		case 20:
+			return 2
+		case 30:
+			return 2
+		case 110:
+			return 1
+		case 121:
+			return 1
+		default:
+			return 0
+		}
+
+	case 8:
+		switch wtSum {
+		case 20:
+			return 2
+		case 111:
+			return 1
+		default:
+			return 0
+		}
+
+	case 16:
+		switch wtSum {
+		case 20:
+			return 2
+		case 111:
+			return 1
+		case 120:
+			var b *Bond
+			for _, bid := range a.bonds {
+				b = mol.bonds[bid-1]
+				if b.bType == cmn.BondTypeDouble {
+					break
+				}
+			}
+			oa, _ := b.otherAtom(a.iId)
+			if mol.atomWithIid(oa).atNum == 8 && len(a.rings) == 0 {
+				return 2
+			}
+			return 0
+		case 220:
+			c := 0
+			for _, bid := range a.bonds {
+				b := mol.bonds[bid-1]
+				if b.bType == cmn.BondTypeDouble {
+					oa, _ := b.otherAtom(a.iId)
+					if len(mol.atomWithIid(oa).rings) == 0 {
+						c++
+					}
+				}
+			}
+			if c > 1 {
+				return -1
+			}
+			return 0
 		default:
 			return 0
 		}

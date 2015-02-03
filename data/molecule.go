@@ -31,3 +31,15 @@ type Molecule struct {
 	atoms []*Atom // List of atoms in this molecule.
 	bonds []*Bond // List of bonds in this molecule.
 }
+
+// atomWithIid answers the atom for the given input ID, if found.
+// Answers `nil` otherwise.
+func (m *Molecule) atomWithIid(id uint16) *Atom {
+	for _, a := range m.atoms {
+		if a.iId == id {
+			return a
+		}
+	}
+
+	return nil
+}
