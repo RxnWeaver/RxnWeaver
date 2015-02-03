@@ -9,4 +9,8 @@ const (
 	ListSizeSmall  = 10 // For functional group lists, etc.
 	ListSizeMedium = 20 // For neighbour lists, etc.
 	ListSizeLarge  = 64 // For atom and bond lists, etc.
+
+	MaxBonds    = 20                // Maximum number of bonds an atom can have.
+	MaxRings    = cmn.ListSizeSmall // Maximum number of rings an atom can be a part of.
+	MaxFeatures = cmn.ListSizeSmall // Maximum number functional groups on an atom.
 )

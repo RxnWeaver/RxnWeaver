@@ -4,12 +4,6 @@ import (
 	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
-const (
-	MaxBonds    = 20
-	MaxRings    = cmn.ListSizeSmall
-	MaxFeatures = cmn.ListSizeSmall
-)
-
 // Atom represents a chemical atom.
 //
 // It has various physical and chemical properties, apart from the
@@ -26,17 +20,20 @@ type Atom struct {
 	Y float32 // Y-coordinate of this atom.
 	Z float32 // Z-coordinate of this atom.
 
-	numH    uint8 // Total of implicit and explicit hydrogen atoms attached to this atom.
+	numH    uint8 // Number of implicit + explicit H atoms attached to this atom.
 	charge  int8  // Residual net charge of this atom.
 	valence int8  // Current valence configuration of this atom.
 
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds [MaxBonds]uint8 // Expanded list of bonds of this atom.
-	nbrs  [MaxBonds]uint8 // List of distinct neighbours of this atom.
+	bonds          [cmn.MaxBonds]uint8 // Expanded list of bonds of this atom.
+	nbrs           [cmn.MaxBonds]uint8 // List of distinct neighbours of this atom.
+	numSingleBonds uint8               // Number of single bonds this atom has.
+	numDoubleBonds uint8               // Number of double bonds this atom has.
+	numTripleBonds uint8               // Number of triple bonds this atom has.
 
-	rings [MaxRings]uint8 // List of rings this atom participates in.
+	rings [cmn.MaxRings]uint8 // List of rings this atom participates in.
 	// Does this atom participate in at least one aromatic ring?
 	isInAroRing bool
 	// Is this atom a bridgehead of a bicyclic system of rings?
@@ -68,4 +65,26 @@ func (a *Atom) AtomicNumber() uint8 {
 // Parent answers the parent molecule of this atom.
 func (a *Atom) Parent() *Molecule {
 	return a.mol
+}
+
+// numPiElectrons answers the number of delocalised pi electrons
+// contributed by this atom.  This number is important for calculating
+// the aromaticity of the rings this atom participates in.
+func (a *Atom) numPiElectrons() int {
+	wtSum := 100*a.numDoubleBonds + 10*a.numSingleBonds + a.charge
+
+	switch a.atNum {
+	case 6:
+		switch wtSum {
+		case 19:
+			return 2
+		case 110:
+			return 1
+		case 120:
+			var b *Bond
+			for _, idx := range bonds {
+
+			}
+		}
+	}
 }
