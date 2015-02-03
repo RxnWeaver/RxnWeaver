@@ -43,7 +43,7 @@ type Atom struct {
 
 	// The functional groups substituted on this atom.  They are listed in
 	// descending order of importance.  The first is the primary feature.
-	features [MaxFeatures]uint8
+	features [cmn.MaxFeatures]uint8
 }
 
 // newAtom constructs and initialises a new atom of the given element
@@ -71,7 +71,7 @@ func (a *Atom) Parent() *Molecule {
 // contributed by this atom.  This number is important for calculating
 // the aromaticity of the rings this atom participates in.
 func (a *Atom) numPiElectrons() int {
-	wtSum := 100*a.numDoubleBonds + 10*a.numSingleBonds + a.charge
+	wtSum := 100*int8(a.numDoubleBonds) + 10*int8(a.numSingleBonds) + a.charge
 
 	switch a.atNum {
 	case 6:
@@ -82,9 +82,21 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, idx := range bonds {
-
+			for _, idx := range a.bonds {
+				b = a.mol.bonds[idx-1]
+				if b.bType == cmn.BondTypeDouble {
+					break
+				}
 			}
+			if len(b.rings) > 0 {
+				return 1
+			} else {
+				return 0
+			}
+		default:
+			return 0
 		}
 	}
+
+	return 0
 }
