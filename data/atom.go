@@ -135,8 +135,9 @@ func (a *Atom) numPiElectrons() int {
 					break
 				}
 			}
-			oa, _ := b.otherAtom(a.iId)
-			if mol.atomWithIid(oa).atNum == 8 && len(a.rings) == 0 {
+			oaid, _ := b.otherAtom(a.iId)
+			oa := mol.atomWithIid(oaid)
+			if oa.atNum == 8 && len(oa.rings) == 0 {
 				return 2
 			}
 			return 0
@@ -145,8 +146,8 @@ func (a *Atom) numPiElectrons() int {
 			for _, bid := range a.bonds {
 				b := mol.bonds[bid-1]
 				if b.bType == cmn.BondTypeDouble {
-					oa, _ := b.otherAtom(a.iId)
-					if len(mol.atomWithIid(oa).rings) == 0 {
+					oaid, _ := b.otherAtom(a.iId)
+					if len(mol.atomWithIid(oaid).rings) == 0 {
 						c++
 					}
 				}
