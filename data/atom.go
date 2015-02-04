@@ -27,8 +27,8 @@ type Atom struct {
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds          [cmn.MaxBonds]uint8 // Expanded list of bonds of this atom.
-	nbrs           [cmn.MaxBonds]uint8 // List of distinct neighbours of this atom.
+	bonds          [cmn.MaxBonds]uint8 // List of distinct neighbours of this atom.
+	xbonds         [cmn.MaxBonds]uint8 // Expanded list of bonds of this atom.
 	numSingleBonds uint8               // Number of single bonds this atom has.
 	numDoubleBonds uint8               // Number of double bonds this atom has.
 	numTripleBonds uint8               // Number of triple bonds this atom has.
@@ -135,7 +135,7 @@ func (a *Atom) numPiElectrons() int {
 					break
 				}
 			}
-			oaid, _ := b.otherAtom(a.iId)
+			oaid := b.otherAtom(a.iId)
 			oa := mol.atomWithIid(oaid)
 			if oa.atNum == 8 && len(oa.rings) == 0 {
 				return 2
@@ -146,7 +146,7 @@ func (a *Atom) numPiElectrons() int {
 			for _, bid := range a.bonds {
 				b := mol.bonds[bid-1]
 				if b.bType == cmn.BondTypeDouble {
-					oaid, _ := b.otherAtom(a.iId)
+					oaid := b.otherAtom(a.iId)
 					if len(mol.atomWithIid(oaid).rings) == 0 {
 						c++
 					}
@@ -167,5 +167,19 @@ func (a *Atom) numPiElectrons() int {
 // isJunction answers true if the current atom has more than 2
 // distinct neighbours.
 func (a *Atom) isJunction() bool {
-	return len(a.nbrs) > 2
+	return len(a.bonds) > 2
+}
+
+// bondTo answers the bond that binds this atom to the given atom, if
+// one such bond exists.  Answers `nil` otherwise.
+func (a *Atom) bondTo(other uint16) *Bond {
+	mol := a.mol
+	for _, bid := range a.bonds {
+		b := mol.bonds[bid-1]
+		if b.otherAtom(a.iId) == other {
+			return b
+		}
+	}
+
+	return nil
 }
