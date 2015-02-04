@@ -183,3 +183,47 @@ func (a *Atom) bondTo(other uint16) *Bond {
 
 	return nil
 }
+
+// firstDoublyBondedNbr answers this atom's doubly-bonded neighbour
+// having the highest priority.
+//
+// This method assumes that the molecule is already normalised!
+// Calling it on a molecule that has not be normalised yet, leads to
+// incorrect results.
+func (a *Atom) firstDoublyBondedNbr() uint16 {
+	if a.numDoubleBonds == 0 {
+		return 0
+	}
+
+	mol := a.mol
+	for _, bid := range a.bonds {
+		b := mol.bonds[bid-1]
+		if b.bType == cmn.BondTypeDouble {
+			return b.otherAtom(a.iId)
+		}
+	}
+
+	panic("Should never be here!")
+}
+
+// firstMultiplyBondedNbr answers this atom's doubly-bonded neighbour
+// having the highest priority.
+//
+// This method assumes that the molecule is already normalised!
+// Calling it on a molecule that has not be normalised yet, leads to
+// incorrect results.
+func (a *Atom) firstMultiplyBondedNbr() uint16 {
+	if a.numDoubleBonds == 0 && a.numTripleBonds == 0 {
+		return 0
+	}
+
+	mol := a.mol
+	for _, bid := range a.bonds {
+		b := mol.bonds[bid-1]
+		if b.bType >= cmn.BondTypeDouble {
+			return b.otherAtom(a.iId)
+		}
+	}
+
+	panic("Should never be here!")
+}
