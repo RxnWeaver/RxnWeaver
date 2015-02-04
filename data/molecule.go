@@ -43,3 +43,18 @@ func (m *Molecule) atomWithIid(id uint16) *Atom {
 
 	return nil
 }
+
+// bondBetween answers the bond between the two given atoms, if one
+// such exists.  Answers `nil` otherwise.
+//
+// Note that the two given atoms are represented by their input IDs,
+// NOT normalised IDs.
+func (m *Molecule) bondBetween(a1, a2 uint16) *Bond {
+	for _, b := range m.bonds {
+		if (b.a1 == a1 && b.a2 == a2) || (b.a2 == a1 && b.a1 == a2) {
+			return b
+		}
+	}
+
+	return nil
+}
