@@ -163,3 +163,9 @@ func (a *Atom) numPiElectrons() int {
 
 	return 0
 }
+
+// isJunction answers true if the current atom has more than 2
+// distinct neighbours.
+func (a *Atom) isJunction() bool {
+	return len(a.nbrs) > 2
+}
