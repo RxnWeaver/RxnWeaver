@@ -152,3 +152,22 @@ func (r *Ring) complete() error {
 	r.isComplete = true
 	return nil
 }
+
+// isAromatic answers if this ring is aromatic.
+//
+// The actual aromaticity determination happens when
+// `determineAromaticity` is called.  This method merely answers the
+// set flag.
+func (r *Ring) isAromatic() bool {
+	return r.isAro
+}
+
+// isHetAromatic answers if this ring is aromatic with at least one
+// hetero atom.
+//
+// The actual aromaticity determination happens when
+// `determineAromaticity` is called.  This method merely answers the
+// set flag.
+func (r *Ring) isHetAromatic() bool {
+	return r.isHetAro
+}

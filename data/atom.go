@@ -300,8 +300,22 @@ func (a *Atom) smallestRing() (uint8, error) {
 // Note that the actual aromaticity determination is handled by
 // `Ring`.  This method merely answers the set flag.
 func (a *Atom) isAromatic() bool {
-	if a.isInAroRing {
-		return true
+	return a.isInAroRing
+}
+
+// inHetAromaticRing answers if this atom is part of an aromatic ring
+// with at least one hetero atom.
+func (a *Atom) inHetAromaticRing() bool {
+	if a.isInAroRing && a.atNum != 6 {
+		return true // Simplest case!
+	}
+
+	mol := a.mol
+	for _, rid := range a.rings {
+		r := mol.ringWithId(rid)
+		if r.isHetAromatic() {
+			return true
+		}
 	}
 
 	return false
