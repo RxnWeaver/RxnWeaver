@@ -1,6 +1,9 @@
 package data
 
 import (
+	"fmt"
+	"math"
+
 	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
@@ -89,7 +92,7 @@ func (a *Atom) numPiElectrons() int {
 					break
 				}
 			}
-			if len(b.rings) > 0 {
+			if b.isCyclic() {
 				return 1
 			}
 			return 0
@@ -137,7 +140,7 @@ func (a *Atom) numPiElectrons() int {
 			}
 			oaid := b.otherAtom(a.iId)
 			oa := mol.atomWithIid(oaid)
-			if oa.atNum == 8 && len(oa.rings) == 0 {
+			if oa.atNum == 8 && !oa.isCyclic() {
 				return 2
 			}
 			return 0
@@ -147,7 +150,7 @@ func (a *Atom) numPiElectrons() int {
 				b := mol.bonds[bid-1]
 				if b.bType == cmn.BondTypeDouble {
 					oaid := b.otherAtom(a.iId)
-					if len(mol.atomWithIid(oaid).rings) == 0 {
+					if !mol.atomWithIid(oaid).isCyclic() {
 						c++
 					}
 				}
@@ -164,8 +167,13 @@ func (a *Atom) numPiElectrons() int {
 	return 0
 }
 
-// isJunction answers true if the current atom has more than 2
-// distinct neighbours.
+// isCyclic answers if this atom participates in at least one ring.
+func (a *Atom) isCyclic() bool {
+	return len(a.rings) > 0
+}
+
+// isJunction answers if this atom has more than 2 distinct
+// neighbours.
 func (a *Atom) isJunction() bool {
 	return len(a.bonds) > 2
 }
@@ -226,4 +234,75 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 	}
 
 	panic("Should never be here!")
+}
+
+// inRingOfSize answers if this atom participates in at least one ring
+// of the given size.
+func (a *Atom) inRingOfSize(n int) bool {
+	mol := a.mol
+	for _, rid := range a.rings {
+		r := mol.ringWithId(rid)
+		if r.size() == n {
+			return true
+		}
+	}
+
+	return false
+}
+
+// inRingLargerThan answers if this atom participates in at least one
+// ring that is larger than the given number.
+func (a *Atom) inRingLargerThan(n int) bool {
+	mol := a.mol
+	for _, rid := range a.rings {
+		r := mol.ringWithId(rid)
+		if r.size() > n {
+			return true
+		}
+	}
+
+	return false
+}
+
+// smallestRing answers the smallest unique ring in which this atom
+// participates.  Should no such unique ring exist, an error is
+// answered.
+func (a *Atom) smallestRing() (uint8, error) {
+	if !a.isCyclic() {
+		return 0, fmt.Errorf("Atom not cyclic.")
+	}
+
+	min := int(math.MaxUint8)
+	c := 0
+	var rid uint8
+
+	mol := a.mol
+	for _, rid := range a.rings {
+		r := mol.ringWithId(rid)
+		size := r.size()
+		if size == min {
+			c++
+		} else if size < min {
+			rid = r.id
+			c = 1
+		}
+	}
+
+	if c > 1 {
+		return 0, fmt.Errorf("Smallest ring size: %d, number of smallest rings: %d.", min, c)
+	}
+
+	return rid, nil
+}
+
+// isAromatic answers if this atom is part of an aromatic ring.
+//
+// Note that the actual aromaticity determination is handled by
+// `Ring`.  This method merely answers the set flag.
+func (a *Atom) isAromatic() bool {
+	if a.isInAroRing {
+		return true
+	}
+
+	return false
 }

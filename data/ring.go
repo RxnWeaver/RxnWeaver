@@ -53,8 +53,7 @@ func (r *Ring) size() int {
 	return len(r.atoms)
 }
 
-// hasAtom answers `true` if this ring includes the given atom.
-// Answers `false` otherwise.
+// hasAtom answers if this ring includes the given atom.
 func (r *Ring) hasAtom(aid uint16) bool {
 	return r.atomBitSet.Test(uint(aid))
 }
@@ -79,8 +78,7 @@ func (r *Ring) atomIndex(aid uint16) int {
 	panic("Should never be here!")
 }
 
-// hasBond answers `true` if this ring includes the given bond.
-// Answers `false` otherwise.
+// hasBond answers if this ring includes the given bond.
 func (r *Ring) hasBond(bid uint16) bool {
 	return r.bondBitSet.Test(uint(bid))
 }

@@ -30,6 +30,7 @@ type Molecule struct {
 
 	atoms []*Atom // List of atoms in this molecule.
 	bonds []*Bond // List of bonds in this molecule.
+	rings []*Ring // List of rings in this molecule.
 }
 
 // atomWithIid answers the atom for the given input ID, if found.
@@ -38,6 +39,42 @@ func (m *Molecule) atomWithIid(id uint16) *Atom {
 	for _, a := range m.atoms {
 		if a.iId == id {
 			return a
+		}
+	}
+
+	return nil
+}
+
+// atomWithNid answers the atom for the given normalised ID, if found.
+// Answers `nil` otherwise.
+func (m *Molecule) atomWithNid(id uint16) *Atom {
+	for _, a := range m.atoms {
+		if a.nId == id {
+			return a
+		}
+	}
+
+	return nil
+}
+
+// bondWithId answers the bond for the given ID, if found.  Answers
+// `nil` otherwise.
+func (m *Molecule) bondWithId(id uint16) *Bond {
+	for _, b := range m.bonds {
+		if b.id == id {
+			return b
+		}
+	}
+
+	return nil
+}
+
+// ringWithId answers the ring for the given ID, if found.  Answers
+// `nil` otherwise.
+func (m *Molecule) ringWithId(id uint8) *Ring {
+	for _, r := range m.rings {
+		if r.id == id {
+			return r
 		}
 	}
 

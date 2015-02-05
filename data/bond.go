@@ -40,3 +40,8 @@ func (b *Bond) otherAtom(a uint16) uint16 {
 
 	return 0
 }
+
+// isCyclic answers if this bond participates in at least one ring.
+func (b *Bond) isCyclic() bool {
+	return len(b.rings) > 0
+}
