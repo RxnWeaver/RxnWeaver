@@ -1,1 +1,11 @@
 language: go
+
+go:
+    - 1.4.1
+
+notifications:
+    email:
+        recipients:
+            - js@ojuslabs.com
+        on_success: change
+        on_failure: always
