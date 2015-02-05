@@ -1,6 +1,8 @@
 package data
 
 import (
+	bits "github.com/willf/bitset"
+
 	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
@@ -19,6 +21,9 @@ type Ring struct {
 	atoms []uint16 // List of atoms participating in this ring.
 	bonds []uint16 // List of bonds participating in this ring.
 	nbrs  []uint8  // List of rings neighbouring this ring.
+
+	atomBitSet *bits.BitSet // For faster comparison.
+	bondBitSet *bits.BitSet // For faster comparison.
 
 	isAro    bool // Is this ring aromatic?
 	isHetAro bool // Is this an aromatic ring with at least one hetero atom?
