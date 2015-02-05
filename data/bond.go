@@ -12,6 +12,8 @@ import (
 // the input molecule.  This is also useful when debugging, since we
 // can directly correlate the bonds to the original input structure.
 type Bond struct {
+	id uint16 // Unique ID of this bond.
+
 	a1      uint16         // iId of the first atom in the bond.
 	a2      uint16         // iId of the second atom in the bond.
 	bType   cmn.BondType   // Is this bond single, double or triple?
