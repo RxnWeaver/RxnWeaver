@@ -13,11 +13,12 @@ type Element struct {
 	Weight   float64 // Atomic weight of the most abundant isotope
 	Valence  int8    // Default valence
 	OxStates []int8  // Other oxidation states
+	ElecNegativity float64 // Electronegativity of the default oxidation state
 }
 
 // String answers a representation of the element that is easily
 // readable.
 func (e *Element) String() string {
-	return fmt.Sprintf("%s : {Number: %d, Symbol: %s, Weight: %.4f, Valence: %d, Oxidation States: %v}\n",
-		e.Name, e.Number, e.Symbol, e.Weight, e.Valence, e.OxStates)
+	return fmt.Sprintf("%s : {Number: %d, Symbol: %s, Weight: %.4f, Valence: %d, Oxidation States: %v, Electronegativity: %.4f}\n",
+		e.Name, e.Number, e.Symbol, e.Weight, e.Valence, e.OxStates, e.ElecNegativity)
 }
