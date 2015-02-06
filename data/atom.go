@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 
+	bits "github.com/willf/bitset"
+
 	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
@@ -30,13 +32,13 @@ type Atom struct {
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds          [cmn.MaxBonds]uint8 // List of distinct neighbours of this atom.
-	xbonds         [cmn.MaxBonds]uint8 // Expanded list of bonds of this atom.
-	numSingleBonds uint8               // Number of single bonds this atom has.
-	numDoubleBonds uint8               // Number of double bonds this atom has.
-	numTripleBonds uint8               // Number of triple bonds this atom has.
+	bonds          *bits.BitSet // Bitmap of bonds of this atom.
+	nbrs           []uint16     // Expanded list of neighbours of this atom.
+	numSingleBonds uint8        // Number of single bonds this atom has.
+	numDoubleBonds uint8        // Number of double bonds this atom has.
+	numTripleBonds uint8        // Number of triple bonds this atom has.
 
-	rings [cmn.MaxRings]uint8 // List of rings this atom participates in.
+	rings *bits.BitSet // Bitmap of IDs of rings this atom participates in.
 	// Does this atom participate in at least one aromatic ring?
 	isInAroRing bool
 	// Is this atom a bridgehead of a bicyclic system of rings?
@@ -56,6 +58,10 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom.mol = mol
 	atom.atNum = atNum
 	atom.valence = cmn.PeriodicTable[cmn.ElemSyms[atNum]].Valence
+
+	atom.bonds = bits.New(cmn.MaxBonds)
+	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
+	atom.rings = bits.New(cmn.MaxRings)
 
 	return atom
 }
@@ -86,8 +92,8 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, bid := range a.bonds {
-				b = mol.bonds[bid-1]
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b = mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -132,8 +138,8 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, bid := range a.bonds {
-				b = mol.bonds[bid-1]
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b = mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -146,8 +152,8 @@ func (a *Atom) numPiElectrons() int {
 			return 0
 		case 220:
 			c := 0
-			for _, bid := range a.bonds {
-				b := mol.bonds[bid-1]
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b := mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					oaid := b.otherAtom(a.iId)
 					if !mol.atomWithIid(oaid).isCyclic() {
@@ -169,21 +175,64 @@ func (a *Atom) numPiElectrons() int {
 
 // isCyclic answers if this atom participates in at least one ring.
 func (a *Atom) isCyclic() bool {
-	return len(a.rings) > 0
+	return a.rings.Count() > 0
 }
 
 // isJunction answers if this atom has more than 2 distinct
 // neighbours.
 func (a *Atom) isJunction() bool {
-	return len(a.bonds) > 2
+	return a.bonds.Count() > 2
+}
+
+// addBond adds the given bond to this atom, if it is not already
+// present.  It also adjusts the list of its neighbours appropriately.
+//
+// Note that it does NOT check to see if the addition conforms to this
+// atom's current valence configuration.
+func (a *Atom) addBond(b *Bond) {
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		if uint16(bid) == b.id {
+			return
+		}
+	}
+
+	a.bonds.Set(uint(b.id))
+	nbrId := b.otherAtom(a.iId)
+	n := int(b.bType)
+	for i := 0; i < n; i++ {
+		a.nbrs = append(a.nbrs, nbrId)
+	}
+}
+
+// removeBond removes the given bond from this atom, and adjusts the
+// list of neighbours appropriately.
+//
+// Note that it does NOT check to see if the removal conforms to this
+// atom's current valence configuration.
+func (a *Atom) removeBond(b *Bond) {
+	nbrId := b.otherAtom(a.iId)
+
+	wid := 0
+	for _, nid := range a.nbrs {
+		if nid == nbrId {
+			continue
+		}
+		a.nbrs[wid] = nid
+		wid++
+	}
+	a.nbrs = a.nbrs[:wid]
+
+	a.bonds.Clear(uint(b.id))
+
+	panic("Should never be here!")
 }
 
 // bondTo answers the bond that binds this atom to the given atom, if
 // one such bond exists.  Answers `nil` otherwise.
 func (a *Atom) bondTo(other uint16) *Bond {
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.otherAtom(a.iId) == other {
 			return b
 		}
@@ -204,8 +253,8 @@ func (a *Atom) firstDoublyBondedNbr() uint16 {
 	}
 
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType == cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
@@ -226,8 +275,8 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 	}
 
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType >= cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
@@ -240,8 +289,8 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 // of the given size.
 func (a *Atom) inRingOfSize(n int) bool {
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.size() == n {
 			return true
 		}
@@ -254,8 +303,8 @@ func (a *Atom) inRingOfSize(n int) bool {
 // ring that is larger than the given number.
 func (a *Atom) inRingLargerThan(n int) bool {
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.size() > n {
 			return true
 		}
@@ -274,16 +323,16 @@ func (a *Atom) smallestRing() (uint8, error) {
 
 	min := int(math.MaxUint8)
 	c := 0
-	var rid uint8
+	var ret uint8
 
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		size := r.size()
 		if size == min {
 			c++
 		} else if size < min {
-			rid = r.id
+			ret = uint8(rid)
 			c = 1
 		}
 	}
@@ -292,7 +341,7 @@ func (a *Atom) smallestRing() (uint8, error) {
 		return 0, fmt.Errorf("Smallest ring size: %d, number of smallest rings: %d.", min, c)
 	}
 
-	return rid, nil
+	return ret, nil
 }
 
 // isAromatic answers if this atom is part of an aromatic ring.
@@ -311,12 +360,47 @@ func (a *Atom) inHetAromaticRing() bool {
 	}
 
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.isHetAromatic() {
 			return true
 		}
 	}
 
 	return false
+}
+
+// haveCommonRings answers if this atom has at least one ring in
+// common with the given atom.
+func (a *Atom) haveCommonRings(aiid uint16) bool {
+	mol := a.mol
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
+		if r.hasAtom(aiid) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// inSameRingsAs answers if this atom participates in exactly the same
+// rings as the given atom.
+func (a *Atom) inSameRingsAs(aiid uint16) bool {
+	other := a.mol.atomWithIid(aiid)
+	size := a.rings.Count()
+	if l := other.rings.Count(); l > size {
+		size = l
+	}
+
+	rs1 := bits.New(uint(size))
+	rs2 := bits.New(uint(size))
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		rs1.Set(rid)
+	}
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		rs2.Set(rid)
+	}
+
+	return rs1.Equal(rs2)
 }
