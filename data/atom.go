@@ -223,8 +223,6 @@ func (a *Atom) removeBond(b *Bond) {
 	a.nbrs = a.nbrs[:wid]
 
 	a.bonds.Clear(uint(b.id))
-
-	panic("Should never be here!")
 }
 
 // bondTo answers the bond that binds this atom to the given atom, if
@@ -373,34 +371,42 @@ func (a *Atom) inHetAromaticRing() bool {
 // haveCommonRings answers if this atom has at least one ring in
 // common with the given atom.
 func (a *Atom) haveCommonRings(aiid uint16) bool {
-	mol := a.mol
-	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
-		r := mol.ringWithId(uint8(rid))
-		if r.hasAtom(aiid) {
-			return true
-		}
-	}
+	other := a.mol.atomWithIid(aiid)
 
-	return false
+	return a.rings.IntersectionCardinality(other.rings) > 0
 }
 
 // inSameRingsAs answers if this atom participates in exactly the same
 // rings as the given atom.
 func (a *Atom) inSameRingsAs(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
-	size := a.rings.Count()
-	if l := other.rings.Count(); l > size {
-		size = l
-	}
 
-	rs1 := bits.New(uint(size))
-	rs2 := bits.New(uint(size))
-	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
-		rs1.Set(rid)
-	}
-	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
-		rs2.Set(rid)
-	}
+	return a.rings.Equal(other.rings)
+}
 
-	return rs1.Equal(rs2)
+// inAllRingsOf answers if this atom participates in every ring in
+// which the given atom does.
+//
+// Note that this atom may participate in more rings, as well.
+func (a *Atom) inAllRingsOf(aiid uint16) bool {
+	other := a.mol.atomWithIid(aiid)
+
+	return other.rings.DifferenceCardinality(a.rings) == 0
+}
+
+// addRing adds the given ring to the list of this atom's rings.
+func (a *Atom) addRing(r *Ring) {
+	a.rings.Set(uint(r.id))
+}
+
+// removeRing removes the given ring from the list of this atom's
+// rings.
+//
+// This method should, usually, not be called.  The composition of a
+// ring never changes once it is completed.  However, during a
+// reaction, a ring may get broken, leading to its death.  The
+// constituent atoms are then notified of that death by calling this
+// method.
+func (a *Atom) removeRing(r *Ring) {
+	a.rings.Clear(uint(r.id))
 }
