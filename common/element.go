@@ -7,12 +7,12 @@ import (
 // Element holds the essential chemical information of a given natural
 // element.
 type Element struct {
-	Number   uint8   // Atomic number
-	Symbol   string  // Chemical symbol
-	Name     string  // Element's name
-	Weight   float64 // Atomic weight of the most abundant isotope
-	Valence  int8    // Default valence
-	OxStates []int8  // Other oxidation states
+	Number         uint8   // Atomic number
+	Symbol         string  // Chemical symbol
+	Name           string  // Element's name
+	Weight         float64 // Atomic weight of the most abundant isotope
+	Valence        int8    // Default valence
+	OxStates       []int8  // Other oxidation states
 	ElecNegativity float64 // Electronegativity of the default oxidation state
 }
 
