@@ -32,11 +32,11 @@ type Atom struct {
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds          [cmn.MaxBonds]uint16 // List of distinct neighbours of this atom.
-	xbonds         [cmn.MaxBonds]uint16 // Expanded list of bonds of this atom.
-	numSingleBonds uint8                // Number of single bonds this atom has.
-	numDoubleBonds uint8                // Number of double bonds this atom has.
-	numTripleBonds uint8                // Number of triple bonds this atom has.
+	bonds          *bits.BitSet // Bitmap of bonds of this atom.
+	nbrs           []uint16     // Expanded list of neighbours of this atom.
+	numSingleBonds uint8        // Number of single bonds this atom has.
+	numDoubleBonds uint8        // Number of double bonds this atom has.
+	numTripleBonds uint8        // Number of triple bonds this atom has.
 
 	rings *bits.BitSet // Bitmap of IDs of rings this atom participates in.
 	// Does this atom participate in at least one aromatic ring?
@@ -59,6 +59,8 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom.atNum = atNum
 	atom.valence = cmn.PeriodicTable[cmn.ElemSyms[atNum]].Valence
 
+	atom.bonds = bits.New(cmn.MaxBonds)
+	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
 	atom.rings = bits.New(cmn.MaxRings)
 
 	return atom
@@ -90,8 +92,8 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, bid := range a.bonds {
-				b = mol.bondWithId(bid - 1)
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b = mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -136,8 +138,8 @@ func (a *Atom) numPiElectrons() int {
 			return 1
 		case 120:
 			var b *Bond
-			for _, bid := range a.bonds {
-				b = mol.bondWithId(bid - 1)
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b = mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -150,8 +152,8 @@ func (a *Atom) numPiElectrons() int {
 			return 0
 		case 220:
 			c := 0
-			for _, bid := range a.bonds {
-				b := mol.bondWithId(bid - 1)
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b := mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
 					oaid := b.otherAtom(a.iId)
 					if !mol.atomWithIid(oaid).isCyclic() {
@@ -179,15 +181,58 @@ func (a *Atom) isCyclic() bool {
 // isJunction answers if this atom has more than 2 distinct
 // neighbours.
 func (a *Atom) isJunction() bool {
-	return len(a.bonds) > 2
+	return a.bonds.Count() > 2
+}
+
+// addBond adds the given bond to this atom, if it is not already
+// present.  It also adjusts the list of its neighbours appropriately.
+//
+// Note that it does NOT check to see if the addition conforms to this
+// atom's current valence configuration.
+func (a *Atom) addBond(b *Bond) {
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		if uint16(bid) == b.id {
+			return
+		}
+	}
+
+	a.bonds.Set(uint(b.id))
+	nbrId := b.otherAtom(a.iId)
+	n := int(b.bType)
+	for i := 0; i < n; i++ {
+		a.nbrs = append(a.nbrs, nbrId)
+	}
+}
+
+// removeBond removes the given bond from this atom, and adjusts the
+// list of neighbours appropriately.
+//
+// Note that it does NOT check to see if the removal conforms to this
+// atom's current valence configuration.
+func (a *Atom) removeBond(b *Bond) {
+	nbrId := b.otherAtom(a.iId)
+
+	wid := 0
+	for _, nid := range a.nbrs {
+		if nid == nbrId {
+			continue
+		}
+		a.nbrs[wid] = nid
+		wid++
+	}
+	a.nbrs = a.nbrs[:wid]
+
+	a.bonds.Clear(uint(b.id))
+
+	panic("Should never be here!")
 }
 
 // bondTo answers the bond that binds this atom to the given atom, if
 // one such bond exists.  Answers `nil` otherwise.
 func (a *Atom) bondTo(other uint16) *Bond {
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bondWithId(bid - 1)
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.otherAtom(a.iId) == other {
 			return b
 		}
@@ -208,8 +253,8 @@ func (a *Atom) firstDoublyBondedNbr() uint16 {
 	}
 
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bondWithId(bid - 1)
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType == cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
@@ -230,8 +275,8 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 	}
 
 	mol := a.mol
-	for _, bid := range a.bonds {
-		b := mol.bondWithId(bid - 1)
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType >= cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
