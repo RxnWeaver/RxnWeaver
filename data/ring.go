@@ -45,6 +45,9 @@ func newRing(mol *Molecule) {
 	r.atoms = make([]uint16, 0, cmn.ListSizeSmall)
 	r.bonds = make([]uint16, 0, cmn.ListSizeSmall)
 	r.nbrs = make([]uint8, 0, cmn.ListSizeSmall)
+
+	r.atomBitSet = bits.New(cmn.ListSizeSmall)
+	r.bondBitSet = bits.New(cmn.ListSizeSmall)
 }
 
 // size answers the size of this ring.  It is equivalently the number

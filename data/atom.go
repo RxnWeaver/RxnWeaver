@@ -32,13 +32,13 @@ type Atom struct {
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds          [cmn.MaxBonds]uint8 // List of distinct neighbours of this atom.
-	xbonds         [cmn.MaxBonds]uint8 // Expanded list of bonds of this atom.
-	numSingleBonds uint8               // Number of single bonds this atom has.
-	numDoubleBonds uint8               // Number of double bonds this atom has.
-	numTripleBonds uint8               // Number of triple bonds this atom has.
+	bonds          [cmn.MaxBonds]uint16 // List of distinct neighbours of this atom.
+	xbonds         [cmn.MaxBonds]uint16 // Expanded list of bonds of this atom.
+	numSingleBonds uint8                // Number of single bonds this atom has.
+	numDoubleBonds uint8                // Number of double bonds this atom has.
+	numTripleBonds uint8                // Number of triple bonds this atom has.
 
-	rings [cmn.MaxRings]uint8 // List of rings this atom participates in.
+	rings *bits.BitSet // Bitmap of IDs of rings this atom participates in.
 	// Does this atom participate in at least one aromatic ring?
 	isInAroRing bool
 	// Is this atom a bridgehead of a bicyclic system of rings?
@@ -58,6 +58,8 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom.mol = mol
 	atom.atNum = atNum
 	atom.valence = cmn.PeriodicTable[cmn.ElemSyms[atNum]].Valence
+
+	atom.rings = bits.New(cmn.MaxRings)
 
 	return atom
 }
@@ -89,7 +91,7 @@ func (a *Atom) numPiElectrons() int {
 		case 120:
 			var b *Bond
 			for _, bid := range a.bonds {
-				b = mol.bonds[bid-1]
+				b = mol.bondWithId(bid - 1)
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -135,7 +137,7 @@ func (a *Atom) numPiElectrons() int {
 		case 120:
 			var b *Bond
 			for _, bid := range a.bonds {
-				b = mol.bonds[bid-1]
+				b = mol.bondWithId(bid - 1)
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
@@ -149,7 +151,7 @@ func (a *Atom) numPiElectrons() int {
 		case 220:
 			c := 0
 			for _, bid := range a.bonds {
-				b := mol.bonds[bid-1]
+				b := mol.bondWithId(bid - 1)
 				if b.bType == cmn.BondTypeDouble {
 					oaid := b.otherAtom(a.iId)
 					if !mol.atomWithIid(oaid).isCyclic() {
@@ -171,7 +173,7 @@ func (a *Atom) numPiElectrons() int {
 
 // isCyclic answers if this atom participates in at least one ring.
 func (a *Atom) isCyclic() bool {
-	return len(a.rings) > 0
+	return a.rings.Count() > 0
 }
 
 // isJunction answers if this atom has more than 2 distinct
@@ -185,7 +187,7 @@ func (a *Atom) isJunction() bool {
 func (a *Atom) bondTo(other uint16) *Bond {
 	mol := a.mol
 	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+		b := mol.bondWithId(bid - 1)
 		if b.otherAtom(a.iId) == other {
 			return b
 		}
@@ -207,7 +209,7 @@ func (a *Atom) firstDoublyBondedNbr() uint16 {
 
 	mol := a.mol
 	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+		b := mol.bondWithId(bid - 1)
 		if b.bType == cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
@@ -229,7 +231,7 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 
 	mol := a.mol
 	for _, bid := range a.bonds {
-		b := mol.bonds[bid-1]
+		b := mol.bondWithId(bid - 1)
 		if b.bType >= cmn.BondTypeDouble {
 			return b.otherAtom(a.iId)
 		}
@@ -242,8 +244,8 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 // of the given size.
 func (a *Atom) inRingOfSize(n int) bool {
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.size() == n {
 			return true
 		}
@@ -256,8 +258,8 @@ func (a *Atom) inRingOfSize(n int) bool {
 // ring that is larger than the given number.
 func (a *Atom) inRingLargerThan(n int) bool {
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.size() > n {
 			return true
 		}
@@ -276,16 +278,16 @@ func (a *Atom) smallestRing() (uint8, error) {
 
 	min := int(math.MaxUint8)
 	c := 0
-	var rid uint8
+	var ret uint8
 
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		size := r.size()
 		if size == min {
 			c++
 		} else if size < min {
-			rid = r.id
+			ret = uint8(rid)
 			c = 1
 		}
 	}
@@ -294,7 +296,7 @@ func (a *Atom) smallestRing() (uint8, error) {
 		return 0, fmt.Errorf("Smallest ring size: %d, number of smallest rings: %d.", min, c)
 	}
 
-	return rid, nil
+	return ret, nil
 }
 
 // isAromatic answers if this atom is part of an aromatic ring.
@@ -313,8 +315,8 @@ func (a *Atom) inHetAromaticRing() bool {
 	}
 
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.isHetAromatic() {
 			return true
 		}
@@ -327,8 +329,8 @@ func (a *Atom) inHetAromaticRing() bool {
 // common with the given atom.
 func (a *Atom) haveCommonRings(aiid uint16) bool {
 	mol := a.mol
-	for _, rid := range a.rings {
-		r := mol.ringWithId(rid)
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		r := mol.ringWithId(uint8(rid))
 		if r.hasAtom(aiid) {
 			return true
 		}
@@ -341,18 +343,18 @@ func (a *Atom) haveCommonRings(aiid uint16) bool {
 // rings as the given atom.
 func (a *Atom) inSameRingsAs(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
-	size := len(a.rings)
-	if l := len(other.rings); l > size {
+	size := a.rings.Count()
+	if l := other.rings.Count(); l > size {
 		size = l
 	}
 
 	rs1 := bits.New(uint(size))
 	rs2 := bits.New(uint(size))
-	for _, rid := range a.rings {
-		rs1.Set(uint(rid))
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		rs1.Set(rid)
 	}
-	for _, rid := range other.rings {
-		rs2.Set(uint(rid))
+	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
+		rs2.Set(rid)
 	}
 
 	return rs1.Equal(rs2)
