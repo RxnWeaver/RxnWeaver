@@ -408,5 +408,5 @@ func (a *Atom) addRing(r *Ring) {
 // constituent atoms are then notified of that death by calling this
 // method.
 func (a *Atom) removeRing(r *Ring) {
-	a.rings.Clear(r.id)
+	a.rings.Clear(uint(r.id))
 }
