@@ -223,8 +223,6 @@ func (a *Atom) removeBond(b *Bond) {
 	a.nbrs = a.nbrs[:wid]
 
 	a.bonds.Clear(uint(b.id))
-
-	panic("Should never be here!")
 }
 
 // bondTo answers the bond that binds this atom to the given atom, if
