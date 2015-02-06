@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math"
 
+	bits "github.com/willf/bitset"
+
 	cmn "github.com/RxnWeaver/rxnweaver/common"
 )
 
@@ -319,4 +321,39 @@ func (a *Atom) inHetAromaticRing() bool {
 	}
 
 	return false
+}
+
+// haveCommonRings answers if this atom has at least one ring in
+// common with the given atom.
+func (a *Atom) haveCommonRings(aiid uint16) bool {
+	mol := a.mol
+	for _, rid := range a.rings {
+		r := mol.ringWithId(rid)
+		if r.hasAtom(aiid) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// inSameRingsAs answers if this atom participates in exactly the same
+// rings as the given atom.
+func (a *Atom) inSameRingsAs(aiid uint16) bool {
+	other := a.mol.atomWithIid(aiid)
+	size := len(a.rings)
+	if l := len(other.rings); l > size {
+		size = l
+	}
+
+	rs1 := bits.New(uint(size))
+	rs2 := bits.New(uint(size))
+	for _, rid := range a.rings {
+		rs1.Set(uint(rid))
+	}
+	for _, rid := range other.rings {
+		rs2.Set(uint(rid))
+	}
+
+	return rs1.Equal(rs2)
 }
