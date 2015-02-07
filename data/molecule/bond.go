@@ -1,4 +1,4 @@
-package data
+package molecule
 
 import (
 	cmn "github.com/RxnWeaver/rxnweaver/common"
