@@ -25,18 +25,18 @@ type Atom struct {
 	Y float32 // Y-coordinate of this atom.
 	Z float32 // Z-coordinate of this atom.
 
-	numH    uint8 // Number of implicit + explicit H atoms attached to this atom.
+	hCount  uint8 // Number of implicit + explicit H atoms attached to this atom.
 	charge  int8  // Residual net charge of this atom.
 	valence int8  // Current valence configuration of this atom.
 
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
-	bonds          *bits.BitSet // Bitmap of bonds of this atom.
-	nbrs           []uint16     // Expanded list of neighbours of this atom.
-	numSingleBonds uint8        // Number of single bonds this atom has.
-	numDoubleBonds uint8        // Number of double bonds this atom has.
-	numTripleBonds uint8        // Number of triple bonds this atom has.
+	bonds           *bits.BitSet // Bitmap of bonds of this atom.
+	nbrs            []uint16     // Expanded list of neighbours of this atom.
+	singleBondCount uint8        // Number of single bonds this atom has.
+	doubleBondCount uint8        // Number of double bonds this atom has.
+	tripleBondCount uint8        // Number of triple bonds this atom has.
 
 	rings *bits.BitSet // Bitmap of IDs of rings this atom participates in.
 	// Does this atom participate in at least one aromatic ring?
@@ -48,7 +48,7 @@ type Atom struct {
 
 	// The functional groups substituted on this atom.  They are listed in
 	// descending order of importance.  The first is the primary feature.
-	features [cmn.MaxFeatures]uint8
+	features []uint16
 }
 
 // newAtom constructs and initialises a new atom of the given element
@@ -62,6 +62,8 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom.bonds = bits.New(cmn.MaxBonds)
 	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
 	atom.rings = bits.New(cmn.MaxRings)
+
+	atom.features = make([]uint16, 0, cmn.MaxFeatures)
 
 	return atom
 }
@@ -81,7 +83,7 @@ func (a *Atom) Parent() *Molecule {
 // the aromaticity of the rings this atom participates in.
 func (a *Atom) numPiElectrons() int {
 	mol := a.mol
-	wtSum := 100*int16(a.numDoubleBonds) + 10*int16(a.numSingleBonds) + int16(a.charge)
+	wtSum := 100*int16(a.doubleBondCount) + 10*int16(a.singleBondCount) + int16(a.charge)
 
 	switch a.atNum {
 	case 6:
@@ -246,7 +248,7 @@ func (a *Atom) bondTo(other uint16) *Bond {
 // Calling it on a molecule that has not be normalised yet, leads to
 // incorrect results.
 func (a *Atom) firstDoublyBondedNbr() uint16 {
-	if a.numDoubleBonds == 0 {
+	if a.doubleBondCount == 0 {
 		return 0
 	}
 
@@ -268,7 +270,7 @@ func (a *Atom) firstDoublyBondedNbr() uint16 {
 // Calling it on a molecule that has not be normalised yet, leads to
 // incorrect results.
 func (a *Atom) firstMultiplyBondedNbr() uint16 {
-	if a.numDoubleBonds == 0 && a.numTripleBonds == 0 {
+	if a.doubleBondCount == 0 && a.tripleBondCount == 0 {
 		return 0
 	}
 
