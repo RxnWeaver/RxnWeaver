@@ -48,7 +48,7 @@ type Atom struct {
 
 	// The functional groups substituted on this atom.  They are listed in
 	// descending order of importance.  The first is the primary feature.
-	features [cmn.MaxFeatures]uint8
+	features []uint16
 }
 
 // newAtom constructs and initialises a new atom of the given element
@@ -62,6 +62,8 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom.bonds = bits.New(cmn.MaxBonds)
 	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
 	atom.rings = bits.New(cmn.MaxRings)
+
+	atom.features = make([]uint16, 0, cmn.MaxFeatures)
 
 	return atom
 }
