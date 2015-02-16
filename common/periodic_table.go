@@ -16,6 +16,10 @@ import (
 //
 // List of Oxidation States of Elements upto 108 taken from
 // http://en.wikipedia.org/wiki/List_of_oxidation_states_of_the_elements
+//
+// Valence : The maximum number of univalent atoms (originally hydrogen or
+// chlorine atoms) that may combine with an atom of the element under
+// consideration
 var PeriodicTable = map[string]Element{
 	"NONE":   Element{0, "NONE", "NONE", 0.0, -1, []int8{}, math.MaxFloat64},
 	"H":      Element{1, "H", "Hydrogen", 1.008, 1, []int8{-1, 1}, 2.20},
@@ -30,10 +34,10 @@ var PeriodicTable = map[string]Element{
 	"Ne":     Element{10, "Ne", "Neon", 20.18, 0, []int8{}, math.MaxFloat64},
 	"Na":     Element{11, "Na", "Sodium", 22.99, 1, []int8{-1, 1}, 0.93},
 	"Mg":     Element{12, "Mg", "Magnesium", 24.305, 2, []int8{1, 2}, 1.31},
-	"Al":     Element{13, "Al", "Aluminium", 26.982, 6, []int8{1, 2, 3}, 1.61},
+	"Al":     Element{13, "Al", "Aluminium", 26.982, 3, []int8{1, 2, 3}, 1.61},
 	"Si":     Element{14, "Si", "Silicon", 28.086, 4, []int8{-4, -3, -2, -1, 1, 2, 3, 4}, 1.90},
 	"P":      Element{15, "P", "Phosphorus", 30.974, 3, []int8{-3, -2, -1, 1, 2, 3, 4, 5}, 2.19},
-	"S":      Element{16, "S", "Sulfur", 32.067, 6, []int8{-2, -1, 1, 2, 3, 4, 5, 6}, 2.58},
+	"S":      Element{16, "S", "Sulfur", 32.067, 2, []int8{-2, -1, 1, 2, 3, 4, 5, 6}, 2.58},
 	"Cl":     Element{17, "Cl", "Chlorine", 35.453, 1, []int8{-1, 1, 2, 3, 4, 5, 6, 7}, 3.16},
 	"Ar":     Element{18, "Ar", "Argon", 39.948, 0, []int8{}, math.MaxFloat64},
 	"K":      Element{19, "K", "Potassium", 39.098, 1, []int8{-1, 1}, 0.82},
