@@ -49,6 +49,13 @@ type Atom struct {
 	// The functional groups substituted on this atom.  They are listed in
 	// descending order of importance.  The first is the primary feature.
 	features []uint16
+
+	// Number of electron-donating neighbours.
+	edNbrCount int
+	// Number of unsaturated electron-withdrawing neighbours.
+	unsatEwNbrCount int
+	// Number of saturated electron-withdrawing neighbours.
+	satEwNbrCount int
 }
 
 // newAtom constructs and initialises a new atom of the given element
@@ -483,4 +490,87 @@ func (a *Atom) isFunctional() bool {
 	}
 
 	return false
+}
+
+// electronWithdrawingNeighbourCount answers the total of unsaturated
+// and saturated electron-withdrawing neighbours of this atom.
+func (a *Atom) electronWithdrawingNeighbourCount() int {
+	return a.unsatEwNbrCount + a.satEwNbrCount
+}
+
+// enolicHydrogenCount answers the number of attached hydrogen atoms,
+// if this atom is enolic.
+//
+// For the attached hydrogen atoms to be enolic, this atom must be a
+// carbon, must be saturated, must have at least one
+// electron-withdrawing neighbour, and must not be a bridgehead.
+func (a *Atom) enolicHydrogenCount() int {
+	if a.atNum != 6 {
+		return 0
+	}
+	l := len(a.nbrs)
+	if !(l == int(a.valence) || l == int(-a.valence)) {
+		return 0
+	}
+	if a.electronWithdrawingNeighbourCount() == 0 {
+		return 0
+	}
+	if a.isBridgeHead {
+		return 0
+	}
+
+	return int(a.hCount)
+}
+
+// isAtomicLeavingGroup answers if this atom can act as a leaving
+// group.
+func (a *Atom) isAtomicLeavingGroup() bool {
+	return a.bonds.Count() == 1 && a.atNum != 6
+}
+
+// isCH2 answers if this atom is a carbon with exactly two hydrogen
+// atoms bound to it.
+func (a *Atom) isCH2() bool {
+	return a.atNum == 6 && a.hCount == 2
+}
+
+// isCH3 answers if this atom is a carbon with exactly three hydrogen
+// atoms bound to it.
+func (a *Atom) isCH3() bool {
+	return a.atNum == 6 && a.hCount == 3
+}
+
+// isCarbonylC answers if this atom is a carbon with exactly one
+// double bond with an oxygen atom.
+func (a *Atom) isCarbonylC() bool {
+	if a.atNum != 6 {
+		return false
+	}
+	l := len(a.nbrs)
+	if !(l == int(a.valence) || l == int(-a.valence)) {
+		return false
+	}
+	if a.doubleBondCount != 1 {
+		return false
+	}
+
+	mol := a.mol
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
+		if b.bType == cmn.BondTypeDouble {
+			oaid := b.otherAtom(a.iId)
+			oa := mol.atomWithIid(oaid)
+			if oa.atNum == 8 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+// isHydroxyl answers if the current atom is an oxygen with exactly
+// one hydrogen atom bound to it.
+func (a *Atom) isHydroxyl() bool {
+	return a.atNum == 8 && a.hCount == 1
 }
