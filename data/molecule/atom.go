@@ -314,8 +314,7 @@ func (a *Atom) isInRingLargerThan(n int) bool {
 }
 
 // smallestRing answers the smallest unique ring in which this atom
-// participates.  Should no such unique ring exist, an error is
-// answered.
+// participates.  If no such unique ring exists, an error is answered.
 func (a *Atom) smallestRing() (uint8, error) {
 	if !a.isCyclic() {
 		return 0, fmt.Errorf("Atom not cyclic.")
@@ -411,4 +410,77 @@ func (a *Atom) addRing(r *Ring) {
 // method.
 func (a *Atom) removeRing(r *Ring) {
 	a.rings.Clear(uint(r.id))
+}
+
+// functionalGroup answers the primary feature of this atom, if one is
+// present.  Answers `0` otherwise.
+func (a *Atom) functionalGroup() uint16 {
+	if len(a.features) == 0 {
+		return 0
+	}
+
+	return a.features[0]
+}
+
+// addFeature adds the given feature to this atom's list of features.
+func (a *Atom) addFeature(fid uint16) {
+	a.features = append(a.features, fid)
+}
+
+// removeFeature removes the first instance of the given feature from
+// this atom's list of features, if it exists in it.
+//
+// Answers `true` upon a successful removal; `false` otherwise.
+func (a *Atom) removeFeature(fid uint16) bool {
+	idx := -1
+	for i, f := range a.features {
+		if f == fid {
+			idx = i
+			break
+		}
+	}
+
+	if idx == -1 {
+		return false
+	}
+
+	a.features = append(a.features[:idx], a.features[idx+1:]...)
+	return true
+}
+
+// featureCount answers the number of features substituted on this
+// atom.
+func (a *Atom) featureCount() int {
+	return len(a.features)
+}
+
+// hasFeature answers if this atom has at least one substituent
+// matching the given group.
+func (a *Atom) hasFeature(fid uint16) bool {
+	for _, f := range a.features {
+		if f == fid {
+			return true
+		}
+	}
+
+	return false
+}
+
+// isFunctional answers if this atom can play an active role in a
+// reaction, in a substituting position.
+//
+// Note that an atom can yet be a reaction centre without being
+// functional.
+func (a *Atom) isFunctional() bool {
+	if a.atNum != 6 {
+		return true
+	}
+	if len(a.features) > 0 {
+		return true
+	}
+	if a.doubleBondCount > 0 || a.tripleBondCount > 0 {
+		return true
+	}
+
+	return false
 }
