@@ -211,6 +211,15 @@ func (a *Atom) addBond(b *Bond) {
 	for i := 0; i < n; i++ {
 		a.nbrs = append(a.nbrs, nbrId)
 	}
+
+	switch n {
+	case 1:
+		a.singleBondCount++
+	case 2:
+		a.doubleBondCount++
+	case 3:
+		a.tripleBondCount++
+	}
 }
 
 // removeBond removes the given bond from this atom, and adjusts the
@@ -220,6 +229,15 @@ func (a *Atom) addBond(b *Bond) {
 // atom's current valence configuration.
 func (a *Atom) removeBond(b *Bond) {
 	nbrId := b.otherAtom(a.iId)
+
+	switch b.bType {
+	case 1:
+		a.singleBondCount--
+	case 2:
+		a.doubleBondCount--
+	case 3:
+		a.tripleBondCount--
+	}
 
 	wid := 0
 	for _, nid := range a.nbrs {
