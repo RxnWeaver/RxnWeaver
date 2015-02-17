@@ -1,25 +1,27 @@
 package common
 
 import (
+	"fmt"
 	"math"
 )
 
 // PeriodicTable represents the chemical periodic table.  It defines
 // the necessary constants for chemical elements, their atomic
 // numbers, atomic weights, isotopes and symbol string
-// representations.  It provides a set of convenience methods to
+// representations.  It provides a set of convenience functions to
 // access and utilise the said data.
 //
-// David R. Lide (ed), CRC Handbook of Chemistry and Physics, 85th Edition.
-// CRC Press. Boca Raton, Florida, 2005; Section 9, Molecular Structure and
-// Spectroscopy; Electronegativity (upto element 94).
+// David R. Lide (ed), CRC Handbook of Chemistry and Physics, 85th
+// Edition.  CRC Press. Boca Raton, Florida, 2005; Section 9,
+// Molecular Structure and Spectroscopy; Electronegativity (upto
+// element 94).
 //
 // List of Oxidation States of Elements upto 108 taken from
 // http://en.wikipedia.org/wiki/List_of_oxidation_states_of_the_elements
 //
-// Valence : The maximum number of univalent atoms (originally hydrogen or
-// chlorine atoms) that may combine with an atom of the element under
-// consideration
+// Valence : The maximum number of univalent atoms (originally
+// hydrogen or chlorine atoms) that may combine with an atom of the
+// element under consideration
 var PeriodicTable = map[string]Element{
 	"NONE":   Element{0, "NONE", "NONE", 0.0, -1, []int8{}, math.MaxFloat64},
 	"H":      Element{1, "H", "Hydrogen", 1.008, 1, []int8{-1, 1}, 2.20},
@@ -357,9 +359,9 @@ var PeriodicTable = map[string]Element{
 	"R":      Element{0, "R", "Any organic group", 0, -1, []int8{}, math.MaxFloat64},
 }
 
-// ElemSyms maps atomic numbers to the symbols of the corresponding
-// chemical elements.
-var ElemSyms = []string{
+// ElementSymbols maps atomic numbers to the symbols of the
+// corresponding chemical elements.
+var ElementSymbols = []string{
 	"NONE",
 	"H",
 	"He",
@@ -479,4 +481,21 @@ var ElemSyms = []string{
 	"Lv",
 	"Uus",
 	"Uuo",
+}
+
+// IsValidOxidationState answers if the given oxidation state is one
+// of the valid states for the given element.
+func IsValidOxidationState(atNum uint8, os int8) (bool, error) {
+	sym := ElementSymbols[atNum]
+	elem, ok := PeriodicTable[sym]
+	if !ok {
+		return false, fmt.Errorf("Unknown symbol: %s", sym)
+	}
+
+	for _, s := range elem.OxStates {
+		if s == os {
+			return true, nil
+		}
+	}
+	return false, fmt.Errorf("Invalid oxidation state: %d for element: %s", os, sym)
 }

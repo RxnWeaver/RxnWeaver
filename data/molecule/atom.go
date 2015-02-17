@@ -29,6 +29,8 @@ type Atom struct {
 	charge  int8  // Residual net charge of this atom.
 	valence int8  // Current valence configuration of this atom.
 
+	unsaturation cmn.Unsaturation // Current composite state of this atom.
+
 	pHash uint64 // A pseudo-hash of this atom, using some attributes.
 	sHash uint64 // A pseudo-hash of this atom, using some attributes.
 
@@ -64,7 +66,7 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 	atom := new(Atom)
 	atom.mol = mol
 	atom.atNum = atNum
-	atom.valence = cmn.PeriodicTable[cmn.ElemSyms[atNum]].Valence
+	atom.valence = cmn.PeriodicTable[cmn.ElementSymbols[atNum]].Valence
 
 	atom.bonds = bits.New(cmn.MaxBonds)
 	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
@@ -83,6 +85,91 @@ func (a *Atom) AtomicNumber() uint8 {
 // Parent answers the parent molecule of this atom.
 func (a *Atom) Parent() *Molecule {
 	return a.mol
+}
+
+// determineUnsaturation computes a composite metric that reflects the
+// current state of the atom.
+//
+// This method is expected to be invoked during a molecule's
+// normalisation only.
+//
+// Note that this method underlies - directly or indirectly - major
+// parts of RxnWeaver's decision rules.  Exercise great caution should
+// you need to modify this in any manner!
+func (a *Atom) determineUnsaturation() error {
+	nb := int(a.bonds.Count())
+	nn := len(a.nbrs)
+
+	// Atom has a residual charge.
+	if a.charge != 0 {
+		a.unsaturation = cmn.UnsaturationCharged
+		return nil
+	}
+
+	// For an uncharged atom, valence should be sane.
+	if a.hCount > 0 {
+		os := int8(nn) + int8(a.hCount)
+		if ok, err := cmn.IsValidOxidationState(a.atNum, os); !ok {
+			return err
+		}
+	}
+
+	// Case of all single bonds.
+	if nb == nn {
+		a.unsaturation = cmn.UnsaturationNone
+		return nil
+	}
+
+	// Double or triple bonds exist.
+	ndb := 0
+	nhdb := 0
+	ntb := 0
+	nhtb := 0
+	mol := a.mol
+	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+		b := mol.bondWithId(uint16(bid - 1))
+		oaid := b.otherAtom(a.iId)
+		oa := mol.atomWithIid(oaid)
+		switch b.bType {
+		case cmn.BondTypeDouble:
+			ndb++
+			if oa.atNum != 6 {
+				nhdb++
+			}
+		case cmn.BondTypeTriple:
+			ntb++
+			if oa.atNum != 6 {
+				nhtb++
+			}
+		}
+	}
+
+	if ntb > 0 {
+		if nhtb > 0 {
+			a.unsaturation = cmn.UnsaturationTripleBondW
+		} else {
+			a.unsaturation = cmn.UnsaturationTripleBondC
+		}
+		// TODO(js): Assess the exhaustiveness.
+		return nil
+	}
+
+	if ndb > 0 {
+		switch {
+		case ndb == 1 && nhdb == 0:
+			a.unsaturation = cmn.UnsaturationDoubleBondC
+		case ndb == 1 && nhdb == 1:
+			a.unsaturation = cmn.UnsaturationDoubleBondW
+		case ndb == 2 && nhdb == 0:
+			a.unsaturation = cmn.UnsaturationDoubleBondCC
+		case ndb == 2 && nhdb == 1:
+			a.unsaturation = cmn.UnsaturationDoubleBondCW
+		case ndb == 2 && nhdb == 2:
+			a.unsaturation = cmn.UnsaturationDoubleBondWW
+		}
+		// TODO(js): Assess the exhaustiveness.
+	}
+	return nil
 }
 
 // piElectronCount answers the number of delocalised pi electrons
@@ -503,7 +590,7 @@ func (a *Atom) isFunctional() bool {
 	if len(a.features) > 0 {
 		return true
 	}
-	if a.doubleBondCount > 0 || a.tripleBondCount > 0 {
+	if a.unsaturation > cmn.UnsaturationNone {
 		return true
 	}
 
@@ -526,8 +613,7 @@ func (a *Atom) enolicHydrogenCount() int {
 	if a.atNum != 6 {
 		return 0
 	}
-	l := len(a.nbrs)
-	if !(l == int(a.valence) || l == int(-a.valence)) {
+	if a.unsaturation > cmn.UnsaturationNone {
 		return 0
 	}
 	if a.electronWithdrawingNeighbourCount() == 0 {
@@ -564,11 +650,7 @@ func (a *Atom) isCarbonylC() bool {
 	if a.atNum != 6 {
 		return false
 	}
-	l := len(a.nbrs)
-	if !(l == int(a.valence) || l == int(-a.valence)) {
-		return false
-	}
-	if a.doubleBondCount != 1 {
+	if a.unsaturation != cmn.UnsaturationDoubleBondW {
 		return false
 	}
 
