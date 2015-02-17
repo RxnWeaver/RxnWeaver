@@ -61,3 +61,24 @@ const (
 	StereoParityUnknown
 	StereoParityUndefined
 )
+
+// The following `enum` definitions are as per RxnWeaver's internal
+// requirements and concepts.  They do not necessarily map readily to
+// any definitions in other software.
+
+// Unsaturation reflects a composite of an atom's oxidation state and
+// its neighbours.
+type Unsaturation uint8
+
+const (
+	UnsaturationNone Unsaturation = iota
+	UnsaturationAromatic
+	UnsaturationDoubleBondC
+	UnsaturationDoubleBondW
+	UnsaturationDoubleBondCC
+	UnsaturationDoubleBondCW
+	UnsaturationDoubleBondWW
+	UnsaturationTripleBondC
+	UnsaturationTripleBondW
+	UnsaturationCharged
+)
