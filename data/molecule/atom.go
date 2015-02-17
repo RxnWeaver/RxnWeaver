@@ -78,10 +78,10 @@ func (a *Atom) Parent() *Molecule {
 	return a.mol
 }
 
-// numPiElectrons answers the number of delocalised pi electrons
+// piElectronCount answers the number of delocalised pi electrons
 // contributed by this atom.  This number is important for calculating
 // the aromaticity of the rings this atom participates in.
-func (a *Atom) numPiElectrons() int {
+func (a *Atom) piElectronCount() int {
 	mol := a.mol
 	wtSum := 100*int16(a.doubleBondCount) + 10*int16(a.singleBondCount) + int16(a.charge)
 
@@ -285,9 +285,9 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 	panic("Should never be here!")
 }
 
-// inRingOfSize answers if this atom participates in at least one ring
-// of the given size.
-func (a *Atom) inRingOfSize(n int) bool {
+// isInRingOfSize answers if this atom participates in at least one
+// ring of the given size.
+func (a *Atom) isInRingOfSize(n int) bool {
 	mol := a.mol
 	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
 		r := mol.ringWithId(uint8(rid))
@@ -299,9 +299,9 @@ func (a *Atom) inRingOfSize(n int) bool {
 	return false
 }
 
-// inRingLargerThan answers if this atom participates in at least one
-// ring that is larger than the given number.
-func (a *Atom) inRingLargerThan(n int) bool {
+// isInRingLargerThan answers if this atom participates in at least
+// one ring that is larger than the given number.
+func (a *Atom) isInRingLargerThan(n int) bool {
 	mol := a.mol
 	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
 		r := mol.ringWithId(uint8(rid))
@@ -352,9 +352,9 @@ func (a *Atom) isAromatic() bool {
 	return a.isInAroRing
 }
 
-// inHetAromaticRing answers if this atom is part of an aromatic ring
-// with at least one hetero atom.
-func (a *Atom) inHetAromaticRing() bool {
+// isInHeteroAromaticRing answers if this atom is part of an aromatic
+// ring with at least one hetero atom.
+func (a *Atom) isInHeteroAromaticRing() bool {
 	if a.isInAroRing && a.atNum != 6 {
 		return true // Simplest case!
 	}
@@ -362,7 +362,7 @@ func (a *Atom) inHetAromaticRing() bool {
 	mol := a.mol
 	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
 		r := mol.ringWithId(uint8(rid))
-		if r.isHetAromatic() {
+		if r.isHeteroAromatic() {
 			return true
 		}
 	}
@@ -378,19 +378,19 @@ func (a *Atom) haveCommonRings(aiid uint16) bool {
 	return a.rings.IntersectionCardinality(other.rings) > 0
 }
 
-// inSameRingsAs answers if this atom participates in exactly the same
-// rings as the given atom.
-func (a *Atom) inSameRingsAs(aiid uint16) bool {
+// isInSameRingsAs answers if this atom participates in exactly the
+// same rings as the given atom.
+func (a *Atom) isInSameRingsAs(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
 
 	return a.rings.Equal(other.rings)
 }
 
-// inAllRingsOf answers if this atom participates in every ring in
+// isInAllRingsOf answers if this atom participates in every ring in
 // which the given atom does.
 //
 // Note that this atom may participate in more rings, as well.
-func (a *Atom) inAllRingsOf(aiid uint16) bool {
+func (a *Atom) isInAllRingsOf(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
 
 	return other.rings.DifferenceCardinality(a.rings) == 0

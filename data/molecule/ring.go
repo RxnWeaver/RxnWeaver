@@ -165,12 +165,12 @@ func (r *Ring) isAromatic() bool {
 	return r.isAro
 }
 
-// isHetAromatic answers if this ring is aromatic with at least one
+// isHeteroAromatic answers if this ring is aromatic with at least one
 // hetero atom.
 //
 // The actual aromaticity determination happens when
 // `determineAromaticity` is called.  This method merely answers the
 // set flag.
-func (r *Ring) isHetAromatic() bool {
+func (r *Ring) isHeteroAromatic() bool {
 	return r.isHetAro
 }
