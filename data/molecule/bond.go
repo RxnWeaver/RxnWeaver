@@ -26,10 +26,10 @@ type Bond struct {
 	rings [cmn.MaxRings]uint8 // The rings this bond participates in.
 }
 
-// otherAtom answers the atom other than the given one that
+// otherAtomIid answers the atom other than the given one that
 // participates in this bond.  Answers `0` if the given atom does not
 // participate in this bond at all.
-func (b *Bond) otherAtom(a uint16) uint16 {
+func (b *Bond) otherAtomIid(a uint16) uint16 {
 	if b.a1 == a {
 		return b.a2
 	}
