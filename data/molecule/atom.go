@@ -669,8 +669,130 @@ func (a *Atom) isCarbonylC() bool {
 	return false
 }
 
-// isHydroxyl answers if the current atom is an oxygen with exactly
-// one hydrogen atom bound to it.
+// isHydroxyl answers if this atom is an oxygen with exactly one
+// hydrogen atom bound to it.
 func (a *Atom) isHydroxyl() bool {
 	return a.atNum == 8 && a.hCount == 1
+}
+
+// isOneOfNOS answers if this atom is any of a nitrogen, oxygen or
+// sulfur atoms.
+func (a *Atom) isOneOfNOS() bool {
+	switch a.atNum {
+	case 7, 8, 16:
+		return true
+	}
+
+	return false
+}
+
+// isOneOfNOPS answers if this atom is any of a nitrogen, oxygen or
+// sulfur atoms.
+func (a *Atom) isOneOfNOPS() bool {
+	switch a.atNum {
+	case 7, 8, 15, 16:
+		return true
+	}
+
+	return false
+}
+
+// isSaturatedC answers if this atom is a carbon with four single
+// bonds.
+func (a *Atom) isSaturatedC() bool {
+	return a.atNum == 6 && a.unsaturation == cmn.UnsaturationNone
+}
+
+// isSaturatedCH2 answers if this atom is a carbon with four single
+// bonds, two of which are to hydrogen atoms.
+func (a *Atom) isSaturatedCH2() bool {
+	return a.isSaturatedC() && a.hCount == 2
+}
+
+// isSaturatedCHavingH answers if this atom is a carbon with four
+// single bonds, at least one of which is to a hydrogen atom.
+func (a *Atom) isSaturatedCHavingH() bool {
+	return a.isSaturatedC() && a.hCount > 0
+}
+
+// isSaturatedHavingH answers if this atom has as many single bonds as
+// its current valence configuration, at least one of which is to a
+// hydrogen atom.
+func (a *Atom) isSaturatedHavingH() bool {
+	return a.unsaturation == cmn.UnsaturationNone && a.hCount > 0
+}
+
+// isTerminal answers if this atom has only one neighbour.
+func (a *Atom) isTerminal() bool {
+	return a.bonds.Count() == 1
+}
+
+// isTerminalHeteroAtom answers if this atom is a hetero atom, having
+// only one neighbour.
+func (a *Atom) isTerminalHeteroAtom() bool {
+	return a.atNum != 6 && a.bonds.Count() == 1
+}
+
+// isTerminalO answers if this atom is an oxygen, having only one
+// neighbour.
+func (a *Atom) isTerminalO() bool {
+	return a.atNum == 8 && a.bonds.Count() == 1
+}
+
+// isTrivalentN answers if this atom is a nitrogen, having current
+// valence of 3.
+func (a *Atom) isTrivalentN() bool {
+	return a.atNum == 7 && a.valence == 3
+}
+
+// isElectronDonating answers if this atom can donate one or more
+// electrons.
+//
+// An atom can donate electrons if it is saturated with its natural
+// valence, and has no electron-withdrawing neighbours.
+//
+// TODO(js): Verify this method's authenticity.
+func (a *Atom) isElectronDonating() bool {
+	if a.unsatEwNbrCount > 0 || a.satEwNbrCount > 0 ||
+		a.unsaturation != cmn.UnsaturationNone {
+		return false
+	}
+
+	switch a.atNum {
+	case 7, 15:
+		return a.bonds.Count() <= 3
+	case 8, 16:
+		return a.bonds.Count() <= 2
+	}
+
+	return false
+}
+
+// isHalogen answers if this atom is one of fluorine, chlorine,
+// bromine or iodine.
+func (a *Atom) isHalogen() bool {
+	switch a.atNum {
+	case 9, 17, 35, 53:
+		return true
+	}
+
+	return false
+}
+
+// isNH2orOHorSH answers if this atom is a nitrogen with two attached
+// hydrogen atoms, or an oxygen with one attached hydrogen atom, or a
+// sulfur with one attached hydrogen atom.
+func (a *Atom) isNH2orOHorSH() bool {
+	if a.hCount == 0 || a.unsaturation != cmn.UnsaturationNone {
+		return false
+	}
+
+	switch a.atNum {
+	case 7:
+		return a.hCount == 2
+	case 8, 16:
+		return a.hCount == 1
+	}
+
+	return false
 }
