@@ -38,9 +38,10 @@ type Ring struct {
 }
 
 // newRing creates and initialises a new ring.
-func newRing(mol *Molecule) {
+func newRing(mol *Molecule, id uint8) {
 	r := new(Ring)
 	r.mol = mol
+	r.id = id
 
 	r.atoms = make([]uint16, 0, cmn.ListSizeSmall)
 	r.bonds = make([]uint16, 0, cmn.ListSizeSmall)
