@@ -128,7 +128,7 @@ func (a *Atom) determineUnsaturation() error {
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid - 1))
-		oaid := b.otherAtom(a.iId)
+		oaid := b.otherAtomIid(a.iId)
 		oa := mol.atomWithIid(oaid)
 		switch b.bType {
 		case cmn.BondTypeDouble:
@@ -240,7 +240,7 @@ func (a *Atom) piElectronCount() int {
 					break
 				}
 			}
-			oaid := b.otherAtom(a.iId)
+			oaid := b.otherAtomIid(a.iId)
 			oa := mol.atomWithIid(oaid)
 			if oa.atNum == 8 && !oa.isCyclic() {
 				return 2
@@ -251,7 +251,7 @@ func (a *Atom) piElectronCount() int {
 			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 				b := mol.bondWithId(uint16(bid - 1))
 				if b.bType == cmn.BondTypeDouble {
-					oaid := b.otherAtom(a.iId)
+					oaid := b.otherAtomIid(a.iId)
 					if !mol.atomWithIid(oaid).isCyclic() {
 						c++
 					}
@@ -293,7 +293,7 @@ func (a *Atom) addBond(b *Bond) {
 	}
 
 	a.bonds.Set(uint(b.id))
-	nbrId := b.otherAtom(a.iId)
+	nbrId := b.otherAtomIid(a.iId)
 	n := int(b.bType)
 	for i := 0; i < n; i++ {
 		a.nbrs = append(a.nbrs, nbrId)
@@ -315,7 +315,7 @@ func (a *Atom) addBond(b *Bond) {
 // Note that it does NOT check to see if the removal conforms to this
 // atom's current valence configuration.
 func (a *Atom) removeBond(b *Bond) {
-	nbrId := b.otherAtom(a.iId)
+	nbrId := b.otherAtomIid(a.iId)
 
 	switch b.bType {
 	case 1:
@@ -345,7 +345,7 @@ func (a *Atom) bondTo(other uint16) *Bond {
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid - 1))
-		if b.otherAtom(a.iId) == other {
+		if b.otherAtomIid(a.iId) == other {
 			return b
 		}
 	}
@@ -368,7 +368,7 @@ func (a *Atom) firstDoublyBondedNbr() uint16 {
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType == cmn.BondTypeDouble {
-			return b.otherAtom(a.iId)
+			return b.otherAtomIid(a.iId)
 		}
 	}
 
@@ -390,7 +390,7 @@ func (a *Atom) firstMultiplyBondedNbr() uint16 {
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType >= cmn.BondTypeDouble {
-			return b.otherAtom(a.iId)
+			return b.otherAtomIid(a.iId)
 		}
 	}
 
@@ -658,7 +658,7 @@ func (a *Atom) isCarbonylC() bool {
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid - 1))
 		if b.bType == cmn.BondTypeDouble {
-			oaid := b.otherAtom(a.iId)
+			oaid := b.otherAtomIid(a.iId)
 			oa := mol.atomWithIid(oaid)
 			if oa.atNum == 8 {
 				return true
