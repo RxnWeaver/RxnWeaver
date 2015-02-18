@@ -2,6 +2,7 @@ package molecule
 
 import (
 	"fmt"
+	"math"
 
 	bits "github.com/willf/bitset"
 
@@ -38,9 +39,10 @@ type Ring struct {
 }
 
 // newRing creates and initialises a new ring.
-func newRing(mol *Molecule) {
+func newRing(mol *Molecule, id uint8) {
 	r := new(Ring)
 	r.mol = mol
+	r.id = id
 
 	r.atoms = make([]uint16, 0, cmn.ListSizeSmall)
 	r.bonds = make([]uint16, 0, cmn.ListSizeSmall)
@@ -173,4 +175,35 @@ func (r *Ring) isAromatic() bool {
 // set flag.
 func (r *Ring) isHeteroAromatic() bool {
 	return r.isHetAro
+}
+
+// normalise transforms the ring into a `standard' representation, in
+// which the ring logically begins with that atom which has the lowest
+// normalised ID.
+func (r *Ring) normalise() error {
+	l := len(r.atoms)
+	if l == 0 {
+		return fmt.Errorf("Cannot normalise an empty ring!")
+	}
+
+	nids := make([]uint16, l, l)
+
+	mol := r.mol
+	for i, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+		nids[i] = a.nId
+	}
+
+	min := uint16(math.MaxUint16)
+	idx := -1
+	for i, nid := range nids {
+		if nid < min {
+			idx = i
+			min = nid
+		}
+	}
+
+	// Rotate the ring so that the atom at `idx` becomes the first.
+	r.atoms = append(r.atoms[idx:], r.atoms[:idx]...)
+	return nil
 }
