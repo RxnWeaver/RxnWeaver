@@ -400,3 +400,58 @@ func (r *Ring) doubleBondCount() int {
 	}
 	return c
 }
+
+// hasAdjacentAtomsSatisfying answers if this ring has two adjacent
+// atoms, both of which satisfy the given constraint.
+//
+// Upon success, it also answers the index of the first of the two
+// atoms.
+func (r *Ring) hasAdjacentAtomsSatisfying(f func(*Atom) bool) (bool, int) {
+	found := false
+	mol := r.mol
+	for i, aiid := range r.atoms {
+		if a := mol.atomWithIid(aiid); f(a) {
+			if found {
+				return true, i - 1
+			}
+			found = true
+		} else {
+			found = false
+		}
+	}
+
+	// If the most-recently-found carbonyl C is the last atom in the
+	// ring, we wrap around, and check the first atom again.
+	if found {
+		if a := mol.atomWithIid(r.atoms[0]); f(a) {
+			return true, len(r.atoms) - 1
+		}
+	}
+
+	return false, -1
+}
+
+// hasAdjacentCarbonyls answers if this ring has two adjacent atoms,
+// both of which are carbonyl carbons.
+func (r *Ring) hasAdjacentCarbonyls() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+		return a.isCarbonylC()
+	})
+}
+
+// hasAdjacentSaturatedCC answers if this ring has two adjacent atoms,
+// both of which are saturated carbons.
+func (r *Ring) hasAdjacentSaturatedCC() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+		return a.isSaturatedC()
+	})
+}
+
+// hasAdjacentCHCH answers if this ring has two adjacent atoms, both
+// of which are saturated carbons with at least one hydrogen atom each
+// bound to them.
+func (r *Ring) hasAdjacentCHCH() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+		return a.isSaturatedC() && a.hCount > 0
+	})
+}
