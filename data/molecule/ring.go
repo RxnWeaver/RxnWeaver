@@ -269,3 +269,134 @@ func (r *Ring) determineAromaticity() {
 		b.isAro = true
 	}
 }
+
+// commonAtoms answers a list of the atoms that participate in both
+// this ring and the given ring.  The representation is a bitset.
+func (r *Ring) commonAtoms(other *Ring) *bits.BitSet {
+	return r.atomBitSet.Intersection(other.atomBitSet)
+}
+
+// commonBonds answers a list of the bonds that participate in both
+// this ring and the given ring.  The representation is a bitset.
+func (r *Ring) commonBonds(other *Ring) *bits.BitSet {
+	return r.bondBitSet.Intersection(other.bondBitSet)
+}
+
+// distanceBetweenAtoms answers the shorter distance in the ring,
+// between the two given atoms.
+func (r *Ring) distanceBetweenAtoms(aid1, aid2 uint16) (int, error) {
+	if !r.hasAtom(aid1) {
+		return 0, fmt.Errorf("Atom %d is not a member of this ring.", aid1)
+	}
+	if !r.hasAtom(aid2) {
+		return 0, fmt.Errorf("Atom %d is not a member of this ring.", aid2)
+	}
+
+	i1, i2 := -1, -1
+	c := 0
+	for i, aid := range r.atoms {
+		switch {
+		case aid == aid1:
+			i1 = i
+			c++
+		case aid == aid2:
+			i2 = i
+			c++
+		}
+		if c == 2 {
+			break
+		}
+	}
+
+	d1 := i1 - i2
+	if d1 < 0 {
+		d1 = -d1
+	}
+	d2 := r.size() - d1
+	if d1 < d2 {
+		return d1, nil
+	}
+	return d2, nil
+}
+
+// isSemiAromaticOfSize6 answers if this ring satisfies the following
+// constraints:
+//
+//     number of aromatic atoms + number of atoms in double bonds +
+//         number of carbons with exocyclic double bonds to hetero atoms +
+//         number of NH nitrogens
+//     == 6
+//
+//     AND
+//
+//     number of carbons with exocyclic double bonds to hetero atoms
+//     == number of NH nitrogens.
+func (r *Ring) isSemiAromaticOfSize6() bool {
+	if r.size() != 6 || r.isAro {
+		return false
+	}
+
+	nAro := r.aromaticAtomCount()
+	nDbly := r.doubleBondCount() * 2
+
+	nNH := 0
+	nExo := 0
+	mol := r.mol
+	for _, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+
+		switch a.atNum {
+		case 6:
+			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
+				b := mol.bondWithId(uint16(bid))
+				if !b.isCyclic() && b.bType == cmn.BondTypeDouble {
+					nbrId := b.otherAtomIid(aiid)
+					nbr := mol.atomWithIid(nbrId)
+					if nbr.atNum != 6 { // Exocyclic hetero neighbour.
+						nExo++
+						break // Carbon can have only one such.
+					}
+				}
+			}
+
+		case 7:
+			if a.hCount == 1 {
+				nNH++
+			}
+		}
+	}
+
+	// All constituents are ready.
+	sum := nAro + nDbly + nNH + nExo
+	return sum == 6 && nNH == nExo
+}
+
+// aromaticAtomCount answers the number of atoms in this ring that are
+// marked as aromatic.
+//
+// Note that it is possible for a non-aromatic ring to contain some
+// aromatic atoms.
+func (r *Ring) aromaticAtomCount() int {
+	c := 0
+	mol := r.mol
+	for _, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+		if a.isInAroRing {
+			c++
+		}
+	}
+	return c
+}
+
+// doubleBondCount answers the number of double bonds in this ring.
+func (r *Ring) doubleBondCount() int {
+	c := 0
+	mol := r.mol
+	for _, bid := range r.bonds {
+		b := mol.bondWithId(bid)
+		if b.bType == cmn.BondTypeDouble {
+			c++
+		}
+	}
+	return c
+}
