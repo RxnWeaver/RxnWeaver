@@ -207,3 +207,65 @@ func (r *Ring) normalise() error {
 	r.atoms = append(r.atoms[idx:], r.atoms[:idx]...)
 	return nil
 }
+
+// piElectronCount answers the total number of pi-electrons in this
+// ring.
+func (r *Ring) piElectronCount() (int, bool) {
+	n := 0
+	mol := r.mol
+	for _, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+		if c, ok := a.piElectronCount(); ok {
+			n += c
+		} else {
+			return 0, false
+		}
+	}
+	return n, true
+}
+
+// determineAromaticity examines this ring to see if it is aromatic in
+// nature.
+//
+// TODO(js): May have to take exceptions into account, as we make
+// progress.
+func (r *Ring) determineAromaticity() {
+	n, ok := r.piElectronCount()
+	if !ok { // Some condition preventing this ring from becoming aromatic.
+		return
+	}
+
+	mol := r.mol
+
+	// First, we apply Hückel's rule.
+	if (n-2)%4 != 0 {
+		// TODO(js): Take exceptions into account.
+		return
+	}
+
+	for _, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+		if a.atNum == 6 {
+			if a.unsaturation == cmn.UnsaturationNone {
+				return // There should not be any sp3 C atoms.
+			}
+		}
+	}
+
+	// TODO(js): Take exceptions into account.
+
+	// If we have come this far, this is an aromatic ring.
+	r.isAro = true
+
+	for _, aiid := range r.atoms {
+		a := mol.atomWithIid(aiid)
+		a.isInAroRing = true
+		if a.atNum != 6 {
+			r.isHetAro = true
+		}
+	}
+	for _, bid := range r.bonds {
+		b := mol.bondWithId(bid)
+		b.isAro = true
+	}
+}

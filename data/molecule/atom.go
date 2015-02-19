@@ -127,7 +127,7 @@ func (a *Atom) determineUnsaturation() error {
 	nhtb := 0
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-		b := mol.bondWithId(uint16(bid - 1))
+		b := mol.bondWithId(uint16(bid))
 		oaid := b.otherAtomIid(a.iId)
 		oa := mol.atomWithIid(oaid)
 		switch b.bType {
@@ -173,9 +173,16 @@ func (a *Atom) determineUnsaturation() error {
 }
 
 // piElectronCount answers the number of delocalised pi electrons
-// contributed by this atom.  This number is important for calculating
-// the aromaticity of the rings this atom participates in.
-func (a *Atom) piElectronCount() int {
+// contributed by this atom.
+//
+// This number is important for calculating the aromaticity of the
+// rings this atom participates in.
+//
+// It answers an additional boolean to indicate if the calculation
+// could contribute towards computation of aromaticity or not.  A
+// `false` value means that the presence of such an atom prevents the
+// ring containing it from becoming aromatic.
+func (a *Atom) piElectronCount() (int, bool) {
 	mol := a.mol
 	wtSum := 100*int16(a.doubleBondCount) + 10*int16(a.singleBondCount) + int16(a.charge)
 
@@ -183,90 +190,80 @@ func (a *Atom) piElectronCount() int {
 	case 6:
 		switch wtSum {
 		case 19:
-			return 2
+			return 2, true
+		case 20:
+			return 0, true
 		case 110:
-			return 1
+			return 1, true
 		case 120:
 			var b *Bond
 			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-				b = mol.bondWithId(uint16(bid - 1))
+				b = mol.bondWithId(uint16(bid))
 				if b.bType == cmn.BondTypeDouble {
 					break
 				}
 			}
-			if b.isCyclic() {
-				return 1
+			if !b.isCyclic() { // Exocyclic bond.
+				return 0, true
 			}
-			return 0
+			return 1, true // Double bond is in a ring.
 		default:
-			return 0
+			return 0, true
 		}
 
 	case 7:
 		switch wtSum {
-		case 20:
-			return 2
-		case 30:
-			return 2
-		case 110:
-			return 1
-		case 121:
-			return 1
+		case 20, 30:
+			return 2, true
+		case 110, 121:
+			return 1, true
 		default:
-			return 0
+			return 0, true
 		}
 
 	case 8:
 		switch wtSum {
 		case 20:
-			return 2
+			return 2, true
 		case 111:
-			return 1
+			return 1, true
 		default:
-			return 0
+			return 0, true
 		}
 
 	case 16:
 		switch wtSum {
 		case 20:
-			return 2
+			return 2, true
 		case 111:
-			return 1
+			return 1, true
 		case 120:
-			var b *Bond
-			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-				b = mol.bondWithId(uint16(bid - 1))
-				if b.bType == cmn.BondTypeDouble {
-					break
-				}
-			}
-			oaid := b.otherAtomIid(a.iId)
+			oaid, b := a.firstDoublyBondedNeighbourId()
 			oa := mol.atomWithIid(oaid)
-			if oa.atNum == 8 && !oa.isCyclic() {
-				return 2
+			if oa.atNum == 8 && !b.isCyclic() { // Exocyclic bond with an oxygen.
+				return 2, true
 			}
-			return 0
+			return 0, true // Double bond is in a ring.
 		case 220:
 			c := 0
 			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-				b := mol.bondWithId(uint16(bid - 1))
+				b := mol.bondWithId(uint16(bid))
 				if b.bType == cmn.BondTypeDouble {
-					oaid := b.otherAtomIid(a.iId)
-					if !mol.atomWithIid(oaid).isCyclic() {
+					if !b.isCyclic() { // Exocyclic bond.
 						c++
 					}
 				}
 			}
 			if c > 1 {
-				return -1
+				return 0, false
 			}
-			return 0
+			return 0, true
 		default:
-			return 0
+			return 0, true
 		}
 	}
 
-	return 0
+	return 0, true
 }
 
 // isCyclic answers if this atom participates in at least one ring.
@@ -344,7 +341,7 @@ func (a *Atom) removeBond(b *Bond) {
 func (a *Atom) bondTo(other uint16) *Bond {
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-		b := mol.bondWithId(uint16(bid - 1))
+		b := mol.bondWithId(uint16(bid))
 		if b.otherAtomIid(a.iId) == other {
 			return b
 		}
@@ -353,44 +350,44 @@ func (a *Atom) bondTo(other uint16) *Bond {
 	return nil
 }
 
-// firstDoublyBondedNbr answers this atom's doubly-bonded neighbour
-// having the highest priority.
+// firstDoublyBondedNeighbourId answers this atom's doubly-bonded
+// neighbour having the highest priority.
 //
 // This method assumes that the molecule is already normalised!
 // Calling it on a molecule that has not be normalised yet, leads to
-// incorrect results.
-func (a *Atom) firstDoublyBondedNbr() uint16 {
+// incorrect results, when more than one double bond exists.
+func (a *Atom) firstDoublyBondedNeighbourId() (uint16, *Bond) {
 	if a.doubleBondCount == 0 {
-		return 0
+		return 0, nil
 	}
 
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-		b := mol.bondWithId(uint16(bid - 1))
+		b := mol.bondWithId(uint16(bid))
 		if b.bType == cmn.BondTypeDouble {
-			return b.otherAtomIid(a.iId)
+			return b.otherAtomIid(a.iId), b
 		}
 	}
 
 	panic("Should never be here!")
 }
 
-// firstMultiplyBondedNbr answers this atom's doubly-bonded neighbour
-// having the highest priority.
+// firstMultiplyBondedNeighbourId answers this atom's doubly-bonded
+// neighbour having the highest priority.
 //
 // This method assumes that the molecule is already normalised!
 // Calling it on a molecule that has not be normalised yet, leads to
 // incorrect results.
-func (a *Atom) firstMultiplyBondedNbr() uint16 {
+func (a *Atom) firstMultiplyBondedNeighbourId() (uint16, *Bond) {
 	if a.doubleBondCount == 0 && a.tripleBondCount == 0 {
-		return 0
+		return 0, nil
 	}
 
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-		b := mol.bondWithId(uint16(bid - 1))
+		b := mol.bondWithId(uint16(bid))
 		if b.bType >= cmn.BondTypeDouble {
-			return b.otherAtomIid(a.iId)
+			return b.otherAtomIid(a.iId), b
 		}
 	}
 
@@ -656,7 +653,7 @@ func (a *Atom) isCarbonylC() bool {
 
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
-		b := mol.bondWithId(uint16(bid - 1))
+		b := mol.bondWithId(uint16(bid))
 		if b.bType == cmn.BondTypeDouble {
 			oaid := b.otherAtomIid(a.iId)
 			oa := mol.atomWithIid(oaid)
