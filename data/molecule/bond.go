@@ -50,12 +50,12 @@ func newBond(mol *Molecule, id, a1, a2 uint16, bType cmn.BondType, bStereo cmn.B
 // otherAtomIid answers the atom other than the given one that
 // participates in this bond.  Answers `0` if the given atom does not
 // participate in this bond at all.
-func (b *Bond) otherAtomIid(a uint16) uint16 {
-	if b.a1 == a {
+func (b *Bond) otherAtomIid(aid uint16) uint16 {
+	if b.a1 == aid {
 		return b.a2
 	}
 
-	if b.a2 == a {
+	if b.a2 == aid {
 		return b.a1
 	}
 

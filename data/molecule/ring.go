@@ -237,7 +237,7 @@ func (r *Ring) determineAromaticity() {
 
 	mol := r.mol
 
-	// First, we apply Hückel's rule.
+	// First, we apply Huckel's rule.
 	if (n-2)%4 != 0 {
 		// TODO(js): Take exceptions into account.
 		return
