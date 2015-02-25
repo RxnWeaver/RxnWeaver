@@ -39,10 +39,10 @@ type Attribute struct {
 type Molecule struct {
 	id uint32 // The globally-unique ID of this molecule.
 
-	atoms       []*Atom       // List of atoms in this molecule.
-	bonds       []*Bond       // List of bonds in this molecule.
-	rings       []*Ring       // List of rings in this molecule.
-	ringSystems []*RingSystem // List of ring systems in this molecule.
+	atoms       []*_Atom       // List of atoms in this molecule.
+	bonds       []*_Bond       // List of bonds in this molecule.
+	rings       []*_Ring       // List of rings in this molecule.
+	ringSystems []*_RingSystem // List of ring systems in this molecule.
 
 	nextAtomIid      uint16 // Running number for atom input IDs.
 	nextBondId       uint16 // Running number for bond IDs.
@@ -63,10 +63,10 @@ func New() *Molecule {
 	mol := new(Molecule)
 	mol.id = nextMoleculeId()
 
-	mol.atoms = make([]*Atom, 0, cmn.ListSizeLarge)
-	mol.bonds = make([]*Bond, 0, cmn.ListSizeLarge)
-	mol.rings = make([]*Ring, 0, cmn.ListSizeSmall)
-	mol.ringSystems = make([]*RingSystem, 0, cmn.ListSizeSmall)
+	mol.atoms = make([]*_Atom, 0, cmn.ListSizeLarge)
+	mol.bonds = make([]*_Bond, 0, cmn.ListSizeLarge)
+	mol.rings = make([]*_Ring, 0, cmn.ListSizeSmall)
+	mol.ringSystems = make([]*_RingSystem, 0, cmn.ListSizeSmall)
 
 	mol.attributes = make([]Attribute, 0, cmn.ListSizeTiny)
 
@@ -80,7 +80,7 @@ func (m *Molecule) Id() uint32 {
 
 // atomWithIid answers the atom for the given input ID, if found.
 // Answers `nil` otherwise.
-func (m *Molecule) atomWithIid(id uint16) *Atom {
+func (m *Molecule) atomWithIid(id uint16) *_Atom {
 	for _, a := range m.atoms {
 		if a.iId == id {
 			return a
@@ -92,7 +92,7 @@ func (m *Molecule) atomWithIid(id uint16) *Atom {
 
 // atomWithNid answers the atom for the given normalised ID, if found.
 // Answers `nil` otherwise.
-func (m *Molecule) atomWithNid(id uint16) *Atom {
+func (m *Molecule) atomWithNid(id uint16) *_Atom {
 	for _, a := range m.atoms {
 		if a.nId == id {
 			return a
@@ -104,7 +104,7 @@ func (m *Molecule) atomWithNid(id uint16) *Atom {
 
 // bondWithId answers the bond for the given ID, if found.  Answers
 // `nil` otherwise.
-func (m *Molecule) bondWithId(id uint16) *Bond {
+func (m *Molecule) bondWithId(id uint16) *_Bond {
 	for _, b := range m.bonds {
 		if b.id == id {
 			return b
@@ -116,7 +116,7 @@ func (m *Molecule) bondWithId(id uint16) *Bond {
 
 // ringWithId answers the ring for the given ID, if found.  Answers
 // `nil` otherwise.
-func (m *Molecule) ringWithId(id uint8) *Ring {
+func (m *Molecule) ringWithId(id uint8) *_Ring {
 	for _, r := range m.rings {
 		if r.id == id {
 			return r
@@ -131,7 +131,7 @@ func (m *Molecule) ringWithId(id uint8) *Ring {
 //
 // Note that the two given atoms are represented by their input IDs,
 // NOT normalised IDs.
-func (m *Molecule) bondBetween(a1id, a2id uint16) *Bond {
+func (m *Molecule) bondBetween(a1id, a2id uint16) *_Bond {
 	for _, b := range m.bonds {
 		if (b.a1 == a1id && b.a2 == a2id) || (b.a2 == a1id && b.a1 == a2id) {
 			return b

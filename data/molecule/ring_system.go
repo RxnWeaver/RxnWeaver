@@ -19,7 +19,7 @@ import (
 //
 // A ring system is mutable, unlike a ring.  Its composition can
 // change during the course of the life of its molecule.
-type RingSystem struct {
+type _RingSystem struct {
 	mol *Molecule // Containing molecule of this ring system.
 	id  uint8     // Unique ID of this ring system in its molecule.
 
@@ -32,8 +32,8 @@ type RingSystem struct {
 
 // newRingSystem creates and initialises a ring system with the given
 // molecule and unique ID.
-func newRingSystem(mol *Molecule, id uint8) *RingSystem {
-	rs := new(RingSystem)
+func newRingSystem(mol *Molecule, id uint8) *_RingSystem {
+	rs := new(_RingSystem)
 	rs.mol = mol
 	rs.id = id
 
@@ -45,12 +45,12 @@ func newRingSystem(mol *Molecule, id uint8) *RingSystem {
 }
 
 // size answers the number of rings in this system.
-func (rs *RingSystem) size() int {
+func (rs *_RingSystem) size() int {
 	return len(rs.rings)
 }
 
 // hasRing answers if this system includes the given ring.
-func (rs *RingSystem) hasRing(rid uint8) (bool, int) {
+func (rs *_RingSystem) hasRing(rid uint8) (bool, int) {
 	for i, id := range rs.rings {
 		if id == rid {
 			return true, i
@@ -63,7 +63,7 @@ func (rs *RingSystem) hasRing(rid uint8) (bool, int) {
 // ringAt answers the ring at the given index.
 //
 // This method does not perform any index boundary checks!
-func (rs *RingSystem) ringAt(idx int) uint8 {
+func (rs *_RingSystem) ringAt(idx int) uint8 {
 	return rs.rings[idx]
 }
 
@@ -72,7 +72,7 @@ func (rs *RingSystem) ringAt(idx int) uint8 {
 //
 // It also updates the internal bitsets of atoms and bonds
 // appropriately.
-func (rs *RingSystem) addRing(r *Ring) error {
+func (rs *_RingSystem) addRing(r *_Ring) error {
 	return rs.addRingAt(rs.size(), r)
 }
 
@@ -85,7 +85,7 @@ func (rs *RingSystem) addRing(r *Ring) error {
 // appropriately.
 //
 //  This method is idempotent.
-func (rs *RingSystem) addRingAt(idx int, r *Ring) error {
+func (rs *_RingSystem) addRingAt(idx int, r *_Ring) error {
 	for _, rid := range rs.rings {
 		if rid == r.id {
 			return nil
@@ -118,7 +118,7 @@ func (rs *RingSystem) addRingAt(idx int, r *Ring) error {
 // appropriately.
 //
 //  This method is idempotent.
-func (rs *RingSystem) removeRing(r *Ring) error {
+func (rs *_RingSystem) removeRing(r *_Ring) error {
 	idx := -1
 	for i, rid := range rs.rings {
 		if rid == r.id {
@@ -139,7 +139,7 @@ func (rs *RingSystem) removeRing(r *Ring) error {
 // appropriately.
 //
 //  This method is idempotent.
-func (rs *RingSystem) removeRingAt(idx int) error {
+func (rs *_RingSystem) removeRingAt(idx int) error {
 	rs.rings = append(rs.rings[:idx], rs.rings[idx+1:]...)
 
 	// Rebuild the bitsets.
@@ -158,7 +158,7 @@ func (rs *RingSystem) removeRingAt(idx int) error {
 
 // piElectronCount answers the total number of delocalised pi
 // electrons in this ring system.
-func (rs *RingSystem) piElectronCount() (int, bool) {
+func (rs *_RingSystem) piElectronCount() (int, bool) {
 	n := 0
 	mol := rs.mol
 	abs := rs.atomBitSet
@@ -179,7 +179,7 @@ func (rs *RingSystem) piElectronCount() (int, bool) {
 // If the system is aromatic, its constituent rings are not tested
 // individually for aromaticity.  This could change in future,
 // depending on exceptions.
-func (rs *RingSystem) determineAromaticity() {
+func (rs *_RingSystem) determineAromaticity() {
 	err := false
 
 	n, ok := rs.piElectronCount()
@@ -222,7 +222,7 @@ func (rs *RingSystem) determineAromaticity() {
 
 // markAtomsBondsAromatic marks all participating atoms and bonds are
 // being aromatic.
-func (rs *RingSystem) markAtomsBondsAromatic() {
+func (rs *_RingSystem) markAtomsBondsAromatic() {
 	mol := rs.mol
 
 	abs := rs.atomBitSet
