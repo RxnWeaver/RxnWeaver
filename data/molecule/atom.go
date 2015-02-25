@@ -25,9 +25,10 @@ type _Atom struct {
 	Y float32 // Y-coordinate of this atom.
 	Z float32 // Z-coordinate of this atom.
 
-	hCount  uint8 // Number of implicit + explicit H atoms attached to this atom.
-	charge  int8  // Residual net charge of this atom.
-	valence int8  // Current valence configuration of this atom.
+	hCount  uint8       // Number of implicit + explicit H atoms attached to this atom.
+	charge  int8        // Residual net charge of this atom.
+	valence int8        // Current valence configuration of this atom.
+	radical cmn.Radical // Current radical configuration.
 
 	unsaturation cmn.Unsaturation // Current composite state of this atom.
 
@@ -62,11 +63,15 @@ type _Atom struct {
 
 // newAtom constructs and initialises a new atom of the given element
 // type, and belonging to the given molecule.
-func newAtom(mol *Molecule, atNum uint8) *_Atom {
+func newAtom(mol *Molecule, atNum uint8, iId int) *_Atom {
 	atom := new(_Atom)
 	atom.mol = mol
 	atom.atNum = atNum
-	atom.valence = cmn.PeriodicTable[cmn.ElementSymbols[atNum]].Valence
+	atom.iId = uint16(iId)
+
+	el := cmn.PeriodicTable[cmn.ElementSymbols[atNum]]
+	atom.symbol = el.Symbol
+	atom.valence = el.Valence
 
 	atom.bonds = bits.New(cmn.MaxBonds)
 	atom.nbrs = make([]uint16, 0, cmn.MaxBonds)
