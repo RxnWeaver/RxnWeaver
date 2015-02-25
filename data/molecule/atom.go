@@ -14,7 +14,7 @@ import (
 // It has various physical and chemical properties, apart from the
 // transient information attached to it during its participation in
 // reactions.
-type Atom struct {
+type _Atom struct {
 	mol    *Molecule // Containing molecule of this atom.
 	atNum  uint8     // Atomic number of this atom's element.
 	symbol string    // Symbol, in case of a different isotope.
@@ -62,8 +62,8 @@ type Atom struct {
 
 // newAtom constructs and initialises a new atom of the given element
 // type, and belonging to the given molecule.
-func newAtom(mol *Molecule, atNum uint8) *Atom {
-	atom := new(Atom)
+func newAtom(mol *Molecule, atNum uint8) *_Atom {
+	atom := new(_Atom)
 	atom.mol = mol
 	atom.atNum = atNum
 	atom.valence = cmn.PeriodicTable[cmn.ElementSymbols[atNum]].Valence
@@ -78,12 +78,12 @@ func newAtom(mol *Molecule, atNum uint8) *Atom {
 }
 
 // AtomicNumber answers the atomic number of this atom.
-func (a *Atom) AtomicNumber() uint8 {
+func (a *_Atom) AtomicNumber() uint8 {
 	return a.atNum
 }
 
 // Parent answers the parent molecule of this atom.
-func (a *Atom) Parent() *Molecule {
+func (a *_Atom) Parent() *Molecule {
 	return a.mol
 }
 
@@ -96,7 +96,7 @@ func (a *Atom) Parent() *Molecule {
 // Note that this method underlies - directly or indirectly - major
 // parts of RxnWeaver's decision rules.  Exercise great caution should
 // you need to modify this in any manner!
-func (a *Atom) determineUnsaturation() error {
+func (a *_Atom) determineUnsaturation() error {
 	nb := int(a.bonds.Count())
 	nn := len(a.nbrs)
 
@@ -182,7 +182,7 @@ func (a *Atom) determineUnsaturation() error {
 // could contribute towards computation of aromaticity or not.  A
 // `false` value means that the presence of such an atom prevents the
 // ring containing it from becoming aromatic.
-func (a *Atom) piElectronCount() (int, bool) {
+func (a *_Atom) piElectronCount() (int, bool) {
 	mol := a.mol
 	wtSum := 100*int16(a.doubleBondCount) + 10*int16(a.singleBondCount) + int16(a.charge)
 
@@ -196,7 +196,7 @@ func (a *Atom) piElectronCount() (int, bool) {
 		case 110:
 			return 1, true
 		case 120:
-			var b *Bond
+			var b *_Bond
 			for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 				b = mol.bondWithId(uint16(bid))
 				if b.bType == cmn.BondTypeDouble {
@@ -267,13 +267,13 @@ func (a *Atom) piElectronCount() (int, bool) {
 }
 
 // isCyclic answers if this atom participates in at least one ring.
-func (a *Atom) isCyclic() bool {
+func (a *_Atom) isCyclic() bool {
 	return a.rings.Count() > 0
 }
 
 // isJunction answers if this atom has more than 2 distinct
 // neighbours.
-func (a *Atom) isJunction() bool {
+func (a *_Atom) isJunction() bool {
 	return a.bonds.Count() > 2
 }
 
@@ -282,7 +282,7 @@ func (a *Atom) isJunction() bool {
 //
 // Note that it does NOT check to see if the addition conforms to this
 // atom's current valence configuration.
-func (a *Atom) addBond(b *Bond) {
+func (a *_Atom) addBond(b *_Bond) {
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		if uint16(bid) == b.id {
 			return
@@ -311,7 +311,7 @@ func (a *Atom) addBond(b *Bond) {
 //
 // Note that it does NOT check to see if the removal conforms to this
 // atom's current valence configuration.
-func (a *Atom) removeBond(b *Bond) {
+func (a *_Atom) removeBond(b *_Bond) {
 	nbrId := b.otherAtomIid(a.iId)
 
 	switch b.bType {
@@ -338,7 +338,7 @@ func (a *Atom) removeBond(b *Bond) {
 
 // bondTo answers the bond that binds this atom to the given atom, if
 // one such bond exists.  Answers `nil` otherwise.
-func (a *Atom) bondTo(other uint16) *Bond {
+func (a *_Atom) bondTo(other uint16) *_Bond {
 	mol := a.mol
 	for bid, ok := a.bonds.NextSet(0); ok; bid, ok = a.bonds.NextSet(bid + 1) {
 		b := mol.bondWithId(uint16(bid))
@@ -356,7 +356,7 @@ func (a *Atom) bondTo(other uint16) *Bond {
 // This method assumes that the molecule is already normalised!
 // Calling it on a molecule that has not be normalised yet, leads to
 // incorrect results, when more than one double bond exists.
-func (a *Atom) firstDoublyBondedNeighbourId() (uint16, *Bond) {
+func (a *_Atom) firstDoublyBondedNeighbourId() (uint16, *_Bond) {
 	if a.doubleBondCount == 0 {
 		return 0, nil
 	}
@@ -378,7 +378,7 @@ func (a *Atom) firstDoublyBondedNeighbourId() (uint16, *Bond) {
 // This method assumes that the molecule is already normalised!
 // Calling it on a molecule that has not be normalised yet, leads to
 // incorrect results.
-func (a *Atom) firstMultiplyBondedNeighbourId() (uint16, *Bond) {
+func (a *_Atom) firstMultiplyBondedNeighbourId() (uint16, *_Bond) {
 	if a.doubleBondCount == 0 && a.tripleBondCount == 0 {
 		return 0, nil
 	}
@@ -396,7 +396,7 @@ func (a *Atom) firstMultiplyBondedNeighbourId() (uint16, *Bond) {
 
 // isInRingOfSize answers if this atom participates in at least one
 // ring of the given size.
-func (a *Atom) isInRingOfSize(n int) bool {
+func (a *_Atom) isInRingOfSize(n int) bool {
 	mol := a.mol
 	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
 		r := mol.ringWithId(uint8(rid))
@@ -410,7 +410,7 @@ func (a *Atom) isInRingOfSize(n int) bool {
 
 // isInRingLargerThan answers if this atom participates in at least
 // one ring that is larger than the given number.
-func (a *Atom) isInRingLargerThan(n int) bool {
+func (a *_Atom) isInRingLargerThan(n int) bool {
 	mol := a.mol
 	for rid, ok := a.rings.NextSet(0); ok; rid, ok = a.rings.NextSet(rid + 1) {
 		r := mol.ringWithId(uint8(rid))
@@ -424,7 +424,7 @@ func (a *Atom) isInRingLargerThan(n int) bool {
 
 // smallestRing answers the smallest unique ring in which this atom
 // participates.  If no such unique ring exists, an error is answered.
-func (a *Atom) smallestRing() (uint8, error) {
+func (a *_Atom) smallestRing() (uint8, error) {
 	if !a.isCyclic() {
 		return 0, fmt.Errorf("Atom not cyclic.")
 	}
@@ -456,13 +456,13 @@ func (a *Atom) smallestRing() (uint8, error) {
 //
 // Note that the actual aromaticity determination is handled by
 // `Ring`.  This method merely answers the set flag.
-func (a *Atom) isAromatic() bool {
+func (a *_Atom) isAromatic() bool {
 	return a.isInAroRing
 }
 
 // isInHeteroAromaticRing answers if this atom is part of an aromatic
 // ring with at least one hetero atom.
-func (a *Atom) isInHeteroAromaticRing() bool {
+func (a *_Atom) isInHeteroAromaticRing() bool {
 	if a.isInAroRing && a.atNum != 6 {
 		return true // Simplest case!
 	}
@@ -480,7 +480,7 @@ func (a *Atom) isInHeteroAromaticRing() bool {
 
 // haveCommonRings answers if this atom has at least one ring in
 // common with the given atom.
-func (a *Atom) haveCommonRings(aiid uint16) bool {
+func (a *_Atom) haveCommonRings(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
 
 	return a.rings.IntersectionCardinality(other.rings) > 0
@@ -488,7 +488,7 @@ func (a *Atom) haveCommonRings(aiid uint16) bool {
 
 // isInSameRingsAs answers if this atom participates in exactly the
 // same rings as the given atom.
-func (a *Atom) isInSameRingsAs(aiid uint16) bool {
+func (a *_Atom) isInSameRingsAs(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
 
 	return a.rings.Equal(other.rings)
@@ -498,14 +498,14 @@ func (a *Atom) isInSameRingsAs(aiid uint16) bool {
 // which the given atom does.
 //
 // Note that this atom may participate in more rings, as well.
-func (a *Atom) isInAllRingsOf(aiid uint16) bool {
+func (a *_Atom) isInAllRingsOf(aiid uint16) bool {
 	other := a.mol.atomWithIid(aiid)
 
 	return other.rings.DifferenceCardinality(a.rings) == 0
 }
 
 // addRing adds the given ring to the list of this atom's rings.
-func (a *Atom) addRing(r *Ring) {
+func (a *_Atom) addRing(r *_Ring) {
 	a.rings.Set(uint(r.id))
 }
 
@@ -517,13 +517,13 @@ func (a *Atom) addRing(r *Ring) {
 // reaction, a ring may get broken, leading to its death.  The
 // constituent atoms are then notified of that death by calling this
 // method.
-func (a *Atom) removeRing(r *Ring) {
+func (a *_Atom) removeRing(r *_Ring) {
 	a.rings.Clear(uint(r.id))
 }
 
 // functionalGroup answers the primary feature of this atom, if one is
 // present.  Answers `0` otherwise.
-func (a *Atom) functionalGroup() uint16 {
+func (a *_Atom) functionalGroup() uint16 {
 	if len(a.features) == 0 {
 		return 0
 	}
@@ -532,7 +532,7 @@ func (a *Atom) functionalGroup() uint16 {
 }
 
 // addFeature adds the given feature to this atom's list of features.
-func (a *Atom) addFeature(fid uint16) {
+func (a *_Atom) addFeature(fid uint16) {
 	a.features = append(a.features, fid)
 }
 
@@ -540,7 +540,7 @@ func (a *Atom) addFeature(fid uint16) {
 // this atom's list of features, if it exists in it.
 //
 // Answers `true` upon a successful removal; `false` otherwise.
-func (a *Atom) removeFeature(fid uint16) bool {
+func (a *_Atom) removeFeature(fid uint16) bool {
 	idx := -1
 	for i, f := range a.features {
 		if f == fid {
@@ -559,13 +559,13 @@ func (a *Atom) removeFeature(fid uint16) bool {
 
 // featureCount answers the number of features substituted on this
 // atom.
-func (a *Atom) featureCount() int {
+func (a *_Atom) featureCount() int {
 	return len(a.features)
 }
 
 // hasFeature answers if this atom has at least one substituent
 // matching the given group.
-func (a *Atom) hasFeature(fid uint16) bool {
+func (a *_Atom) hasFeature(fid uint16) bool {
 	for _, f := range a.features {
 		if f == fid {
 			return true
@@ -580,7 +580,7 @@ func (a *Atom) hasFeature(fid uint16) bool {
 //
 // Note that an atom can yet be a reaction centre without being
 // functional.
-func (a *Atom) isFunctional() bool {
+func (a *_Atom) isFunctional() bool {
 	if a.atNum != 6 {
 		return true
 	}
@@ -596,7 +596,7 @@ func (a *Atom) isFunctional() bool {
 
 // electronWithdrawingNeighbourCount answers the total of unsaturated
 // and saturated electron-withdrawing neighbours of this atom.
-func (a *Atom) electronWithdrawingNeighbourCount() int {
+func (a *_Atom) electronWithdrawingNeighbourCount() int {
 	return a.unsatEwNbrCount + a.satEwNbrCount
 }
 
@@ -606,7 +606,7 @@ func (a *Atom) electronWithdrawingNeighbourCount() int {
 // For the attached hydrogen atoms to be enolic, this atom must be a
 // carbon, must be saturated, must have at least one
 // electron-withdrawing neighbour, and must not be a bridgehead.
-func (a *Atom) enolicHydrogenCount() int {
+func (a *_Atom) enolicHydrogenCount() int {
 	if a.atNum != 6 {
 		return 0
 	}
@@ -625,25 +625,25 @@ func (a *Atom) enolicHydrogenCount() int {
 
 // isAtomicLeavingGroup answers if this atom can act as a leaving
 // group.
-func (a *Atom) isAtomicLeavingGroup() bool {
+func (a *_Atom) isAtomicLeavingGroup() bool {
 	return a.bonds.Count() == 1 && a.atNum != 6
 }
 
 // isCH2 answers if this atom is a carbon with exactly two hydrogen
 // atoms bound to it.
-func (a *Atom) isCH2() bool {
+func (a *_Atom) isCH2() bool {
 	return a.atNum == 6 && a.hCount == 2
 }
 
 // isCH3 answers if this atom is a carbon with exactly three hydrogen
 // atoms bound to it.
-func (a *Atom) isCH3() bool {
+func (a *_Atom) isCH3() bool {
 	return a.atNum == 6 && a.hCount == 3
 }
 
 // isCarbonylC answers if this atom is a carbon with exactly one
 // double bond with an oxygen atom.
-func (a *Atom) isCarbonylC() bool {
+func (a *_Atom) isCarbonylC() bool {
 	if a.atNum != 6 {
 		return false
 	}
@@ -668,13 +668,13 @@ func (a *Atom) isCarbonylC() bool {
 
 // isHydroxyl answers if this atom is an oxygen with exactly one
 // hydrogen atom bound to it.
-func (a *Atom) isHydroxyl() bool {
+func (a *_Atom) isHydroxyl() bool {
 	return a.atNum == 8 && a.hCount == 1
 }
 
 // isOneOfNOS answers if this atom is any of a nitrogen, oxygen or
 // sulfur atoms.
-func (a *Atom) isOneOfNOS() bool {
+func (a *_Atom) isOneOfNOS() bool {
 	switch a.atNum {
 	case 7, 8, 16:
 		return true
@@ -685,7 +685,7 @@ func (a *Atom) isOneOfNOS() bool {
 
 // isOneOfNOPS answers if this atom is any of a nitrogen, oxygen or
 // sulfur atoms.
-func (a *Atom) isOneOfNOPS() bool {
+func (a *_Atom) isOneOfNOPS() bool {
 	switch a.atNum {
 	case 7, 8, 15, 16:
 		return true
@@ -696,49 +696,49 @@ func (a *Atom) isOneOfNOPS() bool {
 
 // isSaturatedC answers if this atom is a carbon with four single
 // bonds.
-func (a *Atom) isSaturatedC() bool {
+func (a *_Atom) isSaturatedC() bool {
 	return a.atNum == 6 && a.unsaturation == cmn.UnsaturationNone
 }
 
 // isSaturatedCH2 answers if this atom is a carbon with four single
 // bonds, two of which are to hydrogen atoms.
-func (a *Atom) isSaturatedCH2() bool {
+func (a *_Atom) isSaturatedCH2() bool {
 	return a.isSaturatedC() && a.hCount == 2
 }
 
 // isSaturatedCHavingH answers if this atom is a carbon with four
 // single bonds, at least one of which is to a hydrogen atom.
-func (a *Atom) isSaturatedCHavingH() bool {
+func (a *_Atom) isSaturatedCHavingH() bool {
 	return a.isSaturatedC() && a.hCount > 0
 }
 
 // isSaturatedHavingH answers if this atom has as many single bonds as
 // its current valence configuration, at least one of which is to a
 // hydrogen atom.
-func (a *Atom) isSaturatedHavingH() bool {
+func (a *_Atom) isSaturatedHavingH() bool {
 	return a.unsaturation == cmn.UnsaturationNone && a.hCount > 0
 }
 
 // isTerminal answers if this atom has only one neighbour.
-func (a *Atom) isTerminal() bool {
+func (a *_Atom) isTerminal() bool {
 	return a.bonds.Count() == 1
 }
 
 // isTerminalHeteroAtom answers if this atom is a hetero atom, having
 // only one neighbour.
-func (a *Atom) isTerminalHeteroAtom() bool {
+func (a *_Atom) isTerminalHeteroAtom() bool {
 	return a.atNum != 6 && a.bonds.Count() == 1
 }
 
 // isTerminalO answers if this atom is an oxygen, having only one
 // neighbour.
-func (a *Atom) isTerminalO() bool {
+func (a *_Atom) isTerminalO() bool {
 	return a.atNum == 8 && a.bonds.Count() == 1
 }
 
 // isTrivalentN answers if this atom is a nitrogen, having current
 // valence of 3.
-func (a *Atom) isTrivalentN() bool {
+func (a *_Atom) isTrivalentN() bool {
 	return a.atNum == 7 && a.valence == 3
 }
 
@@ -749,7 +749,7 @@ func (a *Atom) isTrivalentN() bool {
 // valence, and has no electron-withdrawing neighbours.
 //
 // TODO(js): Verify this method's authenticity.
-func (a *Atom) isElectronDonating() bool {
+func (a *_Atom) isElectronDonating() bool {
 	if a.unsatEwNbrCount > 0 || a.satEwNbrCount > 0 ||
 		a.unsaturation != cmn.UnsaturationNone {
 		return false
@@ -767,7 +767,7 @@ func (a *Atom) isElectronDonating() bool {
 
 // isHalogen answers if this atom is one of fluorine, chlorine,
 // bromine or iodine.
-func (a *Atom) isHalogen() bool {
+func (a *_Atom) isHalogen() bool {
 	switch a.atNum {
 	case 9, 17, 35, 53:
 		return true
@@ -779,7 +779,7 @@ func (a *Atom) isHalogen() bool {
 // isNH2orOHorSH answers if this atom is a nitrogen with two attached
 // hydrogen atoms, or an oxygen with one attached hydrogen atom, or a
 // sulfur with one attached hydrogen atom.
-func (a *Atom) isNH2orOHorSH() bool {
+func (a *_Atom) isNH2orOHorSH() bool {
 	if a.hCount == 0 || a.unsaturation != cmn.UnsaturationNone {
 		return false
 	}

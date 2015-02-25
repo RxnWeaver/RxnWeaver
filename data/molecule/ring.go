@@ -20,7 +20,7 @@ import (
 // The atom IDs held by rings are their input IDs, to match those held
 // by bonds.  That makes using atoms and bonds together easier, when
 // doing ring detection, etc.
-type Ring struct {
+type _Ring struct {
 	mol  *Molecule // Containing molecule of this ring.
 	id   uint8     // A unique identifier for this ring.
 	rsId uint8     // ID of the ring system to which this ring belongs.
@@ -40,7 +40,7 @@ type Ring struct {
 
 // newRing creates and initialises a new ring.
 func newRing(mol *Molecule, id uint8) {
-	r := new(Ring)
+	r := new(_Ring)
 	r.mol = mol
 	r.id = id
 
@@ -54,12 +54,12 @@ func newRing(mol *Molecule, id uint8) {
 
 // size answers the size of this ring.  It is equivalently the number
 // of atoms or the number of bonds participating in this ring.
-func (r *Ring) size() int {
+func (r *_Ring) size() int {
 	return len(r.atoms)
 }
 
 // hasAtom answers if this ring includes the given atom.
-func (r *Ring) hasAtom(aid uint16) bool {
+func (r *_Ring) hasAtom(aid uint16) bool {
 	return r.atomBitSet.Test(uint(aid))
 }
 
@@ -69,7 +69,7 @@ func (r *Ring) hasAtom(aid uint16) bool {
 // Note that the answer may or may not be idempotent, depending on the
 // normalisation status of the ring.  Should the ring be normalised
 // between two invocations of this method, the answers could vary.
-func (r *Ring) atomIndex(aid uint16) int {
+func (r *_Ring) atomIndex(aid uint16) int {
 	if !r.hasAtom(aid) {
 		return -1
 	}
@@ -84,7 +84,7 @@ func (r *Ring) atomIndex(aid uint16) int {
 }
 
 // hasBond answers if this ring includes the given bond.
-func (r *Ring) hasBond(bid uint16) bool {
+func (r *_Ring) hasBond(bid uint16) bool {
 	return r.bondBitSet.Test(uint(bid))
 }
 
@@ -98,7 +98,7 @@ func (r *Ring) hasBond(bid uint16) bool {
 //
 // This method is idempotent: the given atom is ignored if it is
 // already a member of this ring.
-func (r *Ring) addAtom(aid uint16) error {
+func (r *_Ring) addAtom(aid uint16) error {
 	if r.isComplete {
 		return fmt.Errorf("Ring already complete.  ID : %d.", r.id)
 	}
@@ -128,7 +128,7 @@ func (r *Ring) addAtom(aid uint16) error {
 // first.  This operation effectively freezes the ring.
 //
 // This method is idempotent.
-func (r *Ring) complete() error {
+func (r *_Ring) complete() error {
 	if r.isComplete {
 		return nil
 	}
@@ -163,7 +163,7 @@ func (r *Ring) complete() error {
 // The actual aromaticity determination happens when
 // `determineAromaticity` is called.  This method merely answers the
 // set flag.
-func (r *Ring) isAromatic() bool {
+func (r *_Ring) isAromatic() bool {
 	return r.isAro
 }
 
@@ -173,14 +173,14 @@ func (r *Ring) isAromatic() bool {
 // The actual aromaticity determination happens when
 // `determineAromaticity` is called.  This method merely answers the
 // set flag.
-func (r *Ring) isHeteroAromatic() bool {
+func (r *_Ring) isHeteroAromatic() bool {
 	return r.isHetAro
 }
 
 // normalise transforms the ring into a `standard' representation, in
 // which the ring logically begins with that atom which has the lowest
 // normalised ID.
-func (r *Ring) normalise() error {
+func (r *_Ring) normalise() error {
 	l := len(r.atoms)
 	if l == 0 {
 		return fmt.Errorf("Cannot normalise an empty ring!")
@@ -210,7 +210,7 @@ func (r *Ring) normalise() error {
 
 // piElectronCount answers the total number of pi-electrons in this
 // ring.
-func (r *Ring) piElectronCount() (int, bool) {
+func (r *_Ring) piElectronCount() (int, bool) {
 	n := 0
 	mol := r.mol
 	for _, aiid := range r.atoms {
@@ -229,7 +229,7 @@ func (r *Ring) piElectronCount() (int, bool) {
 //
 // TODO(js): May have to take exceptions into account, as we make
 // progress.
-func (r *Ring) determineAromaticity() {
+func (r *_Ring) determineAromaticity() {
 	n, ok := r.piElectronCount()
 	if !ok { // Some condition preventing this ring from becoming aromatic.
 		return
@@ -272,19 +272,19 @@ func (r *Ring) determineAromaticity() {
 
 // commonAtoms answers a list of the atoms that participate in both
 // this ring and the given ring.  The representation is a bitset.
-func (r *Ring) commonAtoms(other *Ring) *bits.BitSet {
+func (r *_Ring) commonAtoms(other *_Ring) *bits.BitSet {
 	return r.atomBitSet.Intersection(other.atomBitSet)
 }
 
 // commonBonds answers a list of the bonds that participate in both
 // this ring and the given ring.  The representation is a bitset.
-func (r *Ring) commonBonds(other *Ring) *bits.BitSet {
+func (r *_Ring) commonBonds(other *_Ring) *bits.BitSet {
 	return r.bondBitSet.Intersection(other.bondBitSet)
 }
 
 // distanceBetweenAtoms answers the shorter distance in the ring,
 // between the two given atoms.
-func (r *Ring) distanceBetweenAtoms(aid1, aid2 uint16) (int, error) {
+func (r *_Ring) distanceBetweenAtoms(aid1, aid2 uint16) (int, error) {
 	if !r.hasAtom(aid1) {
 		return 0, fmt.Errorf("Atom %d is not a member of this ring.", aid1)
 	}
@@ -331,7 +331,7 @@ func (r *Ring) distanceBetweenAtoms(aid1, aid2 uint16) (int, error) {
 //
 //     number of carbons with exocyclic double bonds to hetero atoms
 //     == number of NH nitrogens.
-func (r *Ring) isSemiAromaticOfSize6() bool {
+func (r *_Ring) isSemiAromaticOfSize6() bool {
 	if r.size() != 6 || r.isAro {
 		return false
 	}
@@ -376,7 +376,7 @@ func (r *Ring) isSemiAromaticOfSize6() bool {
 //
 // Note that it is possible for a non-aromatic ring to contain some
 // aromatic atoms.
-func (r *Ring) aromaticAtomCount() int {
+func (r *_Ring) aromaticAtomCount() int {
 	c := 0
 	mol := r.mol
 	for _, aiid := range r.atoms {
@@ -389,7 +389,7 @@ func (r *Ring) aromaticAtomCount() int {
 }
 
 // doubleBondCount answers the number of double bonds in this ring.
-func (r *Ring) doubleBondCount() int {
+func (r *_Ring) doubleBondCount() int {
 	c := 0
 	mol := r.mol
 	for _, bid := range r.bonds {
@@ -406,7 +406,7 @@ func (r *Ring) doubleBondCount() int {
 //
 // Upon success, it also answers the index of the first of the two
 // atoms.
-func (r *Ring) hasAdjacentAtomsSatisfying(f func(*Atom) bool) (bool, int) {
+func (r *_Ring) hasAdjacentAtomsSatisfying(f func(*_Atom) bool) (bool, int) {
 	found := false
 	mol := r.mol
 	for i, aiid := range r.atoms {
@@ -433,16 +433,16 @@ func (r *Ring) hasAdjacentAtomsSatisfying(f func(*Atom) bool) (bool, int) {
 
 // hasAdjacentCarbonyls answers if this ring has two adjacent atoms,
 // both of which are carbonyl carbons.
-func (r *Ring) hasAdjacentCarbonyls() (bool, int) {
-	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+func (r *_Ring) hasAdjacentCarbonyls() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *_Atom) bool {
 		return a.isCarbonylC()
 	})
 }
 
 // hasAdjacentSaturatedCC answers if this ring has two adjacent atoms,
 // both of which are saturated carbons.
-func (r *Ring) hasAdjacentSaturatedCC() (bool, int) {
-	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+func (r *_Ring) hasAdjacentSaturatedCC() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *_Atom) bool {
 		return a.isSaturatedC()
 	})
 }
@@ -450,8 +450,8 @@ func (r *Ring) hasAdjacentSaturatedCC() (bool, int) {
 // hasAdjacentCHCH answers if this ring has two adjacent atoms, both
 // of which are saturated carbons with at least one hydrogen atom each
 // bound to them.
-func (r *Ring) hasAdjacentCHCH() (bool, int) {
-	return r.hasAdjacentAtomsSatisfying(func(a *Atom) bool {
+func (r *_Ring) hasAdjacentCHCH() (bool, int) {
+	return r.hasAdjacentAtomsSatisfying(func(a *_Atom) bool {
 		return a.isSaturatedC() && a.hCount > 0
 	})
 }

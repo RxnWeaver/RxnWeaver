@@ -14,7 +14,7 @@ import (
 // normalised IDs.  This is because they are constructed while reading
 // the input molecule.  This is also useful when debugging, since we
 // can directly correlate the bonds to the original input structure.
-type Bond struct {
+type _Bond struct {
 	mol *Molecule // Containing molecule of this bond.
 	id  uint16    // Unique ID of this bond.
 
@@ -32,8 +32,8 @@ type Bond struct {
 
 // newBond constructs and initialises a new bond between the two given
 // atoms, with the provided configuration.
-func newBond(mol *Molecule, id, a1, a2 uint16, bType cmn.BondType, bStereo cmn.BondStereo) *Bond {
-	bond := new(Bond)
+func newBond(mol *Molecule, id, a1, a2 uint16, bType cmn.BondType, bStereo cmn.BondStereo) *_Bond {
+	bond := new(_Bond)
 	bond.mol = mol
 	bond.id = id
 	bond.a1 = a1
@@ -50,7 +50,7 @@ func newBond(mol *Molecule, id, a1, a2 uint16, bType cmn.BondType, bStereo cmn.B
 // otherAtomIid answers the atom other than the given one that
 // participates in this bond.  Answers `0` if the given atom does not
 // participate in this bond at all.
-func (b *Bond) otherAtomIid(aid uint16) uint16 {
+func (b *_Bond) otherAtomIid(aid uint16) uint16 {
 	if b.a1 == aid {
 		return b.a2
 	}
@@ -63,13 +63,13 @@ func (b *Bond) otherAtomIid(aid uint16) uint16 {
 }
 
 // isCyclic answers if this bond participates in at least one ring.
-func (b *Bond) isCyclic() bool {
+func (b *_Bond) isCyclic() bool {
 	return len(b.rings) > 0
 }
 
 // addRing adds the given ring to the list of rings in which this bond
 // participates.
-func (b *Bond) addRing(rid uint8) {
+func (b *_Bond) addRing(rid uint8) {
 	for _, id := range b.rings {
 		if id == rid {
 			return
@@ -81,7 +81,7 @@ func (b *Bond) addRing(rid uint8) {
 
 // removeRing removes the given ring from the list of rings in which
 // this bond participates, if it does participate in the given ring.
-func (b *Bond) removeRing(rid uint8) {
+func (b *_Bond) removeRing(rid uint8) {
 	idx := -1
 	for i, id := range b.rings {
 		if id == rid {
@@ -96,7 +96,7 @@ func (b *Bond) removeRing(rid uint8) {
 }
 
 // isInRing answers if this bond participates in the given ring.
-func (b *Bond) isInRing(rid uint8) bool {
+func (b *_Bond) isInRing(rid uint8) bool {
 	for _, id := range b.rings {
 		if id == rid {
 			return true
@@ -108,7 +108,7 @@ func (b *Bond) isInRing(rid uint8) bool {
 
 // isInRingOfSize answers if this bond participates in at least one
 // ring of the given size.
-func (b *Bond) isInRingOfSize(n int) bool {
+func (b *_Bond) isInRingOfSize(n int) bool {
 	mol := b.mol
 	for _, rid := range b.rings {
 		r := mol.ringWithId(rid)
@@ -122,7 +122,7 @@ func (b *Bond) isInRingOfSize(n int) bool {
 
 // smallestRing answers the smallest unique ring in which this atom
 // participates.  If no such unique ring exists, an error is answered.
-func (b *Bond) smallestRing() (uint8, error) {
+func (b *_Bond) smallestRing() (uint8, error) {
 	if !b.isCyclic() {
 		return 0, fmt.Errorf("Bond is not cyclic.")
 	}
