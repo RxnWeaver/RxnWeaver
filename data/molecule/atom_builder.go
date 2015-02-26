@@ -33,7 +33,7 @@ func (ab *AtomBuilder) New(sym string, iId int) (*AtomBuilder, error) {
 
 	// The molecule, in which this atom gets eventually included,
 	// should set itself as the containing molecule.
-	ab.a = newAtom(nil, el.Number, iId)
+	ab.a = newAtom(ab.mol, el.Number, iId)
 	return ab, nil
 }
 

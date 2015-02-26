@@ -32,15 +32,10 @@ type _Bond struct {
 
 // newBond constructs and initialises a new bond between the two given
 // atoms, with the provided configuration.
-func newBond(mol *Molecule, id, a1, a2 uint16, bType cmn.BondType, bStereo cmn.BondStereo) *_Bond {
+func newBond(mol *Molecule, id int) *_Bond {
 	bond := new(_Bond)
 	bond.mol = mol
-	bond.id = id
-	bond.a1 = a1
-	bond.a2 = a2
-
-	bond.bType = bType
-	bond.bStereo = bStereo
+	bond.id = uint16(id)
 
 	bond.rings = make([]uint8, 0, cmn.MaxRings)
 
