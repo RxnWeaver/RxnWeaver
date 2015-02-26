@@ -49,10 +49,12 @@ func (bb *BondBuilder) Atoms(aiid1, aiid2 int) (*BondBuilder, error) {
 	// We do not add bonds to hydrogen atoms.
 	if a1.atNum == 1 {
 		a2.hCount++
+		bb.b = nil
 		return bb, fmt.Errorf("Bond involves a hydrogen atom.")
 	}
 	if a2.atNum == 1 {
 		a1.hCount++
+		bb.b = nil
 		return bb, fmt.Errorf("Bond involves a hydrogen atom.")
 	}
 
