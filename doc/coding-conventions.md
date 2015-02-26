@@ -1,8 +1,7 @@
 # Defaults
 
 The usual Go coding conventions apply unless overridden hereunder.
-Refer to
-[Effective Go](https://golang.org/doc/effective_go.html#names) for
+Refer to [Effective Go](https://golang.org/doc/effective_go.html) for
 some advice.
 
 ## File Names
@@ -29,7 +28,8 @@ E.g. `_Atom`.
 ## Variable Names
 
 For both top-level variables and `struct` members, in general, the
-last part of a variable's name should indicate *what* it is.
+last part of a variable's name should indicate *what* it is.  This
+applies to function and method parameter names as well.
 
 ```{go}
 var numSingleBonds int  // Incorrect; this is NOT a collection of bonds.
@@ -64,8 +64,8 @@ Functions and methods representing actions should have names that are
 verb forms, preferably in the imperative.
 
 ```{go}
-func ringDetection() error { } // Incorrect.
-func detectRings() error { }   // Correct.
+func ringDetection() error { } // Incorrect; uses noun form.
+func detectRings() error { }   // Correct; uses imperative verb form.
 ```
 
 Functions and methods whose return value(s) (not side effects) are
@@ -73,7 +73,30 @@ primary, should have their names as noun words representing the nature
 of the return values.
 
 ```{go}
-func (m *Molecule) findBondBetween(atom1, atom2 uint16) *Bond { } // Incorrect.
-func (m *Molecule) bondBetween(atom1, atom2 uint16) *Bond {}      // Correct.
+func (m *Molecule) findBondBetween(atomId1, atomId2 uint16) *Bond { } // Incorrect.
+func (m *Molecule) bondBetween(atomId1, atomId2 uint16) *Bond { }     // Correct.
 
 ```
+
+### Return Values
+
+Pay attention to what each function or method answers to its caller.
+Choose carefully if they should be returned by value or by reference.
+
+When multiple values are returned, if one of them represents a boolean
+status or an error status/value, put that at the end of the return
+value tuple.  This is in line with the 'comma ok' convention.
+
+When a value and an error are returned, the following rules apply.
+
+- **(good value, `nil`)** : best case; caller should continue.
+- **(good value, non-`nil`)** : minor issue to note, but caller should
+  continue.
+- **(invalid value or nil, non-`nil`)** : major issue; caller should
+  handle the error.
+- **(invalid value or nil, `nil`)** : forbidden combination.
+
+### Chaining
+
+Where chaining function or method calls makes natural sense, the names
+of such functions or methods should be as fluent as possible.
