@@ -25,7 +25,7 @@ Types which are unexported should still use an initial uppercase
 letter, except that they are prefixed with an underscore.
 E.g. `_Atom`.
 
-## Variable Names
+## Variables
 
 For both top-level variables and `struct` members, in general, the
 last part of a variable's name should indicate *what* it is.  This
@@ -52,7 +52,15 @@ Names of exported variables should as full as necessary.  While you
 can use common abbreviations, avoid less known ones.  However, avoid
 needlessly long and overly descriptive names.
 
+### Local Variables
+
+Do *not* use the `var` form for local variables; use `:=`, and let Go
+do the type inference.
+
 ## Functions and Methods
+
+Use top-level functions where they are the best fit.  Do not create
+`struct`s only to convert such functions into methods.
 
 Top-level functions and methods follow the same set of conventions.
 Both exported and unexported functions and methods follow the same set
@@ -92,9 +100,9 @@ When a value and an error are returned, the following rules apply.
 - **(good value, `nil`)** : best case; caller should continue.
 - **(good value, non-`nil`)** : minor issue to note, but caller should
   continue.
-- **(invalid value or nil, non-`nil`)** : major issue; caller should
+- **(invalid value or `nil`, non-`nil`)** : major issue; caller should
   handle the error.
-- **(invalid value or nil, `nil`)** : forbidden combination.
+- **(invalid value or `nil`, `nil`)** : forbidden combination.
 
 ### Chaining
 
