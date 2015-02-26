@@ -68,9 +68,19 @@ func New() *Molecule {
 	mol.rings = make([]*_Ring, 0, cmn.ListSizeSmall)
 	mol.ringSystems = make([]*_RingSystem, 0, cmn.ListSizeSmall)
 
+	mol.nextAtomIid = 1
+	mol.nextBondId = 1
+	mol.nextRingId = 1
+	mol.nextRingSystemId = 1
+
 	mol.attributes = make([]Attribute, 0, cmn.ListSizeTiny)
 
 	return mol
+}
+
+// NewAtomBuilder answers a new atom builder.
+func (m *Molecule) NewAtomBuilder() *AtomBuilder {
+	return &AtomBuilder{m, nil}
 }
 
 // Id answers the globally-unique ID of this molecule.

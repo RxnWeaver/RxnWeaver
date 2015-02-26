@@ -14,25 +14,21 @@ import (
 // NOT be extracted or used directly.  The only way to make use of it
 // is to send it to a molecule for inclusion in it.
 //
-// An instance of builder can create and build only one atom.
+// An instance of builder can create and build any number of atoms.
 type AtomBuilder struct {
-	a *_Atom // Atom being built by this builder.
-}
-
-// NewAtomBuilder answers a new atom builder.
-func NewAtomBuilder() *AtomBuilder {
-	return &AtomBuilder{}
+	mol *Molecule // Molecule whose atoms this builder constructs.
+	a   *_Atom    // Atom being built by this builder.
 }
 
 // New creates a new atom instance in this builder.
-func (ab *AtomBuilder) New(iId int, sym string) (*AtomBuilder, error) {
-	if iId <= 0 {
-		return nil, fmt.Errorf("Input ID of an atom must be positive; given : %d", iId)
+func (ab *AtomBuilder) New(sym string, iId int) (*AtomBuilder, error) {
+	if uint16(iId) != ab.mol.nextAtomIid {
+		return nil, fmt.Errorf("Possible out-of-sequence parsing.  Expected atom input ID : %d, given : %d", ab.mol.nextAtomIid, iId)
 	}
 
 	el, ok := cmn.PeriodicTable[sym]
 	if !ok {
-		return nil, fmt.Errorf("Unknown symbol : %s", sym)
+		return nil, fmt.Errorf("Unknown element symbol : %s", sym)
 	}
 
 	// The molecule, in which this atom gets eventually included,
