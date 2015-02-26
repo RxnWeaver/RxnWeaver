@@ -83,6 +83,11 @@ func (m *Molecule) NewAtomBuilder() *AtomBuilder {
 	return &AtomBuilder{m, nil}
 }
 
+// NewBondBuilder answers a new bond builder.
+func (m *Molecule) NewBondBuilder() *BondBuilder {
+	return &BondBuilder{m, nil}
+}
+
 // Id answers the globally-unique ID of this molecule.
 func (m *Molecule) Id() uint32 {
 	return m.id
