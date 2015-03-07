@@ -13,6 +13,7 @@ type nextMolIdHolder struct {
 	nextId uint32
 }
 
+// The only instance of `nextMolIdHolder`.
 var nextMolId nextMolIdHolder
 
 func nextMoleculeId() uint32 {
@@ -21,15 +22,6 @@ func nextMoleculeId() uint32 {
 
 	nextMolId.nextId++
 	return nextMolId.nextId
-}
-
-// Attribute represents a (key, value) pair that annotates this
-// molecule.
-//
-// A given molecule can have zero or more such attributes.
-type Attribute struct {
-	name  string
-	value string
 }
 
 // Molecule represents a chemical molecule.
