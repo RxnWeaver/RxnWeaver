@@ -31,6 +31,13 @@ func nextMoleculeId() uint32 {
 type Molecule struct {
 	id uint32 // The globally-unique ID of this molecule.
 
+	// Channel on which this molecule receives requests and
+	// notifications.
+	inChannel chan InMessage
+	// Channel on which this molecule sends responses to received
+	// requests.
+	outChannel chan OutMessage
+
 	atoms       []*_Atom       // List of atoms in this molecule.
 	bonds       []*_Bond       // List of bonds in this molecule.
 	rings       []*_Ring       // List of rings in this molecule.
@@ -60,11 +67,6 @@ func New() *Molecule {
 	mol.rings = make([]*_Ring, 0, cmn.ListSizeSmall)
 	mol.ringSystems = make([]*_RingSystem, 0, cmn.ListSizeSmall)
 
-	mol.nextAtomIid = 1
-	mol.nextBondId = 1
-	mol.nextRingId = 1
-	mol.nextRingSystemId = 1
-
 	mol.attributes = make([]Attribute, 0, cmn.ListSizeTiny)
 
 	return mol
@@ -83,6 +85,16 @@ func (m *Molecule) NewBondBuilder() *BondBuilder {
 // Id answers the globally-unique ID of this molecule.
 func (m *Molecule) Id() uint32 {
 	return m.id
+}
+
+// InChannel answers the input channel of this molecule.
+func (m *Molecule) InChannel() chan InMessage {
+	return m.inChannel
+}
+
+// OutChannel answers the output channel of this molecule.
+func (m *Molecule) OutChannel() chan OutMessage {
+	return m.outChannel
 }
 
 // atomWithIid answers the atom for the given input ID, if found.
