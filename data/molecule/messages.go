@@ -26,7 +26,7 @@ type InMessage struct {
 //
 // Thus, it is highly imperative that other agents that correspond
 // with a molecule be aware of what responses molecules send, and what
-// payloads are to be delivered as part of the message.
+// payloads are delivered as part of the message.
 type OutMessage struct {
 	Status  int16
 	Cookie  uint64
