@@ -1,5 +1,11 @@
 package molecule
 
+// RequestType enumerates the requests understood by a molecule.
+type RequestType uint8
+
+// StatusType enumerates the response statuses sent by a molecule.
+type StatusType int16
+
 // InMessage is a message sent to a molecule by an external agent.
 //
 // An in-message comprises a request, an optional cookie value and a
@@ -11,7 +17,7 @@ package molecule
 // with a molecule be aware of what requests molecules understand, and
 // what payloads are to be delivered as part of the message.
 type InMessage struct {
-	Request uint8
+	Request RequestType
 	Cookie  uint64
 	Payload interface{}
 }
@@ -28,7 +34,7 @@ type InMessage struct {
 // with a molecule be aware of what responses molecules send, and what
 // payloads are delivered as part of the message.
 type OutMessage struct {
-	Status  int16
+	Status  StatusType
 	Cookie  uint64
 	Payload interface{}
 }
