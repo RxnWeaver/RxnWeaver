@@ -34,9 +34,6 @@ type Molecule struct {
 	// Channel on which this molecule receives requests and
 	// notifications.
 	inChannel chan InMessage
-	// Channel on which this molecule sends responses to received
-	// requests.
-	outChannel chan OutMessage
 
 	atoms       []*_Atom       // List of atoms in this molecule.
 	bonds       []*_Bond       // List of bonds in this molecule.
@@ -90,11 +87,6 @@ func (m *Molecule) Id() uint32 {
 // InChannel answers the input channel of this molecule.
 func (m *Molecule) InChannel() chan InMessage {
 	return m.inChannel
-}
-
-// OutChannel answers the output channel of this molecule.
-func (m *Molecule) OutChannel() chan OutMessage {
-	return m.outChannel
 }
 
 // atomWithIid answers the atom for the given input ID, if found.
