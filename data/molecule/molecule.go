@@ -24,6 +24,39 @@ func nextMoleculeId() uint32 {
 	return nextMolId.nextId
 }
 
+// molecules holds all the molecules that are currently alive.
+type molecules struct {
+	allMolecules map[uint32]*Molecule
+}
+
+// MoleculeWithId answers the molecule instance with the given ID, if
+// one such exists.
+func (ms *molecules) MoleculeWithId(id uint32) *Molecule {
+	if mol, ok := ms.allMolecules[id]; ok {
+		return mol
+	}
+
+	return nil
+}
+
+// Clear sends a termination request to all the alive molecules, and
+// stops tracking them.
+func (ms *molecules) Clear() {
+	for id, mol := range ms.allMolecules {
+		msg := InMessage{ReqExit, 0, nil, nil}
+		mol.InChannel() <- msg
+		delete(ms.allMolecules, id)
+	}
+}
+
+// The only instance of `molecules`.
+var AllMolecules molecules
+
+// Initialise the global molecule cache.
+func init() {
+	AllMolecules.allMolecules = make(map[uint32]*Molecule)
+}
+
 // Molecule represents a chemical molecule.
 //
 // It holds information concerning its atom, bonds, rings, etc.  Note
@@ -59,12 +92,17 @@ func New() *Molecule {
 	mol := new(Molecule)
 	mol.id = nextMoleculeId()
 
+	mol.inChannel = make(chan InMessage, ReqChanSize)
+
 	mol.atoms = make([]*_Atom, 0, cmn.ListSizeLarge)
 	mol.bonds = make([]*_Bond, 0, cmn.ListSizeLarge)
 	mol.rings = make([]*_Ring, 0, cmn.ListSizeSmall)
 	mol.ringSystems = make([]*_RingSystem, 0, cmn.ListSizeSmall)
 
 	mol.attributes = make([]Attribute, 0, cmn.ListSizeTiny)
+
+	// Start the molecule's event loop.
+	go mol.run()
 
 	return mol
 }
@@ -87,6 +125,46 @@ func (m *Molecule) Id() uint32 {
 // InChannel answers the input channel of this molecule.
 func (m *Molecule) InChannel() chan InMessage {
 	return m.inChannel
+}
+
+// run is the event loop of this molecule.
+//
+// It serves as the entry point of all in-coming requests from all
+// external agents.  For each request, an appropriate processing is
+// then performed, and the result returned on the channel that is part
+// of that request.
+func (m *Molecule) run() {
+	// Register this molecule in the cache.
+	AllMolecules.allMolecules[m.id] = m
+
+	// Unregister this molecule from the cache when done.
+	defer delete(AllMolecules.allMolecules, m.id)
+
+	alive := true
+
+liveloop:
+	for {
+		if !alive {
+			break liveloop
+		}
+
+		select {
+		case msg := <-m.inChannel:
+
+			switch msg.Request {
+			case ReqExit:
+				alive = false
+
+			default:
+				m.processInMessage(msg)
+			}
+		}
+	}
+}
+
+// processInMessage is the workhorse function of this molecule.
+func (m *Molecule) processInMessage(msg InMessage) {
+	// TODO(js): Implement.
 }
 
 // atomWithIid answers the atom for the given input ID, if found.

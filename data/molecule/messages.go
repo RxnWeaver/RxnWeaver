@@ -46,9 +46,12 @@ type OutMessage struct {
 	Payload interface{}
 }
 
+// Request channel buffer size.
+const ReqChanSize = 5
+
 // Constants representing the requests understood by a molecule.
 const (
-	ReqNone RequestType = iota // Do not use this.
+	ReqExit RequestType = iota
 	ReqAddAtom
 	ReqAddBond
 	ReqSetAtomAttribute
