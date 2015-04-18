@@ -121,6 +121,8 @@ func (r *_Ring) addAtom(aid uint16) error {
 
 	r.bonds = append(r.bonds, b.id)
 	r.atoms = append(r.atoms, aid)
+	r.bondBitSet.Set(uint(b.id))
+	r.atomBitSet.Set(uint(aid))
 	return nil
 }
 
@@ -146,13 +148,6 @@ func (r *_Ring) complete() error {
 	}
 
 	r.bonds = append(r.bonds, b.id)
-
-	for _, aid := range r.atoms {
-		r.atomBitSet.Set(uint(aid))
-	}
-	for _, bid := range r.bonds {
-		r.bondBitSet.Set(uint(bid))
-	}
 
 	r.isComplete = true
 	return nil
