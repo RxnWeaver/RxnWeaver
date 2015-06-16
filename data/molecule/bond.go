@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"math"
 
-	cmn "github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/RxnWeaver/common"
 )
 
 // Bond represents a chemical bond.  This is strictly between two
