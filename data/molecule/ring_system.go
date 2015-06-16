@@ -5,7 +5,7 @@ import (
 
 	bits "github.com/willf/bitset"
 
-	cmn "github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/RxnWeaver/common"
 )
 
 // RingSystem represents a set of physically fused rings.  Fusion is

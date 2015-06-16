@@ -6,7 +6,7 @@ import (
 
 	bits "github.com/willf/bitset"
 
-	cmn "github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/RxnWeaver/common"
 )
 
 // Ring represents a simple cycle in a molecule.

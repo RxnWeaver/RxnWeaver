@@ -3,7 +3,7 @@ package molecule
 import (
 	"fmt"
 
-	cmn "github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/RxnWeaver/common"
 )
 
 // AtomBuilder builds an atom, in typical builder fashion, one

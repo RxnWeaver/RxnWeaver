@@ -3,7 +3,7 @@ package molecule
 import (
 	"sync"
 
-	cmn "github.com/RxnWeaver/rxnweaver/common"
+	cmn "github.com/RxnWeaver/RxnWeaver/common"
 )
 
 // nextMolIdHolder is a synchronised struct used to assign a
